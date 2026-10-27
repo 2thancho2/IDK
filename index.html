@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PLAYBOX</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#fff;font:14px/1.4 system-ui,"Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+a{color:inherit;text-decoration:none}
+button,input{font:inherit;color:inherit}
+button,.btn{cursor:pointer;background:none;border:1px solid #fff;border-radius:8px;padding:6px 12px}
+button:hover,.btn:hover{background:#fff;color:#000}
+:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.nav{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;height:56px;padding:0 16px;background:#000;border-bottom:1px solid #fff}
+.nav>a,.nav>.t{padding:8px 12px;border:0;border-radius:8px;font-weight:600}
+.nav>a:hover{background:#fff;color:#000}
+.logo{display:flex;align-items:center;gap:8px;font-weight:900;letter-spacing:2px;margin-right:10px}
+#q{flex:1;max-width:420px;margin:0 auto;padding:8px 14px;background:#000;border:1px solid #fff;border-radius:99px}
+#q::placeholder{color:#888}
+.chip{display:flex;align-items:center;gap:8px;border-radius:99px;padding:3px 14px 3px 4px}
+.chip svg{width:30px;height:30px;background:#222;border-radius:50%}
+main{max-width:1280px;margin:0 auto;padding:20px 20px 60px}
+.hi{display:flex;align-items:center;gap:14px}
+.hi svg{width:64px;height:64px;border:1px solid #fff;border-radius:50%;background:#111}
+.hi h1{font-size:22px;margin:0}.hi p{margin:0;color:#999}
+.sh{display:flex;justify-content:space-between;align-items:baseline;margin:26px 0 10px}
+.sh h2{margin:0;font-size:20px}.sh a{color:#bbb;font-size:13px}.sh a:hover{color:#fff}
+.rw{position:relative}
+.tr{display:flex;gap:14px;overflow-x:auto;scroll-behavior:smooth;scrollbar-width:none;padding:2px}
+.tr::-webkit-scrollbar{display:none}
+.card{flex:0 0 150px;display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:18px 14px}
+.grid .card{flex:none}
+.th{position:relative;aspect-ratio:1;border:1px solid #fff;border-radius:10px;overflow:hidden;background:#0c0c0c}
+.th svg,.th img{width:100%;height:100%;object-fit:cover;display:block}
+.pl{position:absolute;inset:0;display:grid;place-items:center;font-size:34px;background:rgba(0,0,0,.65);opacity:0;transition:opacity .15s}
+.card:hover .pl,.card:focus-visible .pl{opacity:1}
+.card b{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-top:8px}
+.card small{color:#999}
+.ar{position:absolute;top:58px;z-index:2;width:34px;height:34px;padding:0;border-radius:50%;background:#000;font-size:20px;line-height:1}
+.ar[data-d="-1"]{left:-14px}.ar[data-d="1"]{right:-14px}
+@media(hover:none){.ar{display:none}}
+.msg{border:1px dashed #fff;border-radius:12px;padding:24px;margin-top:24px;line-height:1.7}
+.pb{display:flex;align-items:center;gap:10px;margin-bottom:10px}.pb b{flex:1;font-size:18px}
+#gf{display:block;width:100%;height:calc(100vh - 150px);min-height:420px;border:1px solid #fff;border-radius:10px;background:#000}
+dialog{background:#000;color:#fff;border:1px solid #fff;border-radius:14px;padding:0;width:min(560px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.8)}
+.in{padding:22px}
+.ed{display:grid;grid-template-columns:150px 1fr;gap:20px}
+.ed>svg{width:150px;height:225px;border:1px solid #fff;border-radius:10px;background:#111}
+.ed label{display:block;margin:12px 0 5px;color:#aaa;font-size:12px}.ed label:first-child{margin-top:0}
+.ed input{width:100%;padding:8px 10px;background:#000;border:1px solid #fff;border-radius:8px}
+.sw{display:flex;flex-wrap:wrap;gap:7px}
+.sw button{width:28px;height:28px;padding:0;border-radius:50%}
+.sw .t{width:auto;height:auto;padding:4px 10px;border-radius:8px}
+.sw .on{outline:2px solid #fff;outline-offset:2px}
+.sw .t.on{background:#fff;color:#000}
+.ft{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+.data-manage{margin-top:24px;padding-top:20px;border-top:1px solid #333;}
+.data-manage>b{display:block;margin-bottom:5px;font-size:15px;}
+.data-manage p{margin:0 0 12px;color:#999;font-size:12px;line-height:1.6;}
+.data-buttons{display:flex;gap:8px;}
+.data-buttons button{flex:1;padding:9px 12px;}
+@media(max-width:700px){.nav{flex-wrap:wrap;height:auto;padding:8px 12px}#q{order:9;flex:1 1 100%;max-width:none;margin:4px 0}.card{flex-basis:128px}.ar{top:48px}.ed{grid-template-columns:1fr}.ed>svg{margin:auto}}
+.game-detail{max-width:1100px; margin:0 auto;}
+.game-hero{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(260px,.8fr);gap:24px;align-items:stretch;}
+.gallery{position:relative;aspect-ratio:16/9;overflow:hidden;border:1px solid #fff;border-radius:14px;background:#111;}
+.gallery img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+.gallery-empty{
+  width:100%;
+  height:100%;
+  display:grid;
+  place-items:center;
+  color:#777;
+}
+
+.gallery-btn{
+  position:absolute;
+  top:50%;
+  transform:translateY(-50%);
+  width:42px;
+  height:42px;
+  padding:0;
+  border-radius:50%;
+  background:rgba(0,0,0,.75);
+  font-size:24px;
+}
+
+.gallery-btn.prev{left:12px}
+.gallery-btn.next{right:12px}
+
+.gallery-dots{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:12px;
+  display:flex;
+  justify-content:center;
+  gap:7px;
+}
+
+.gallery-dot{
+  width:9px;
+  height:9px;
+  padding:0;
+  border:0;
+  border-radius:50%;
+  background:#777;
+}
+
+.gallery-dot.on{
+  background:#fff;
+  transform:scale(1.25);
+}
+
+.game-info{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+}
+
+.game-info h1{
+  margin:0 0 6px;
+  font-size:32px;
+  line-height:1.15;
+}
+
+.game-dev{
+  color:#999;
+  margin-bottom:16px;
+}
+
+.game-meta{
+  color:#aaa;
+  margin-bottom:20px;
+}
+
+.play-big{
+  width:100%;
+  padding:14px;
+  margin-top:auto;
+  background:#fff;
+  color:#000;
+  border-radius:10px;
+  font-size:17px;
+  font-weight:800;
+}
+
+.play-big:hover{
+  background:#ddd;
+}
+
+.favorite-btn{
+  width:100%;
+  padding:11px;
+  margin-top:10px;
+}
+
+.favorite-btn.on{
+  background:#fff;
+  color:#000;
+}
+
+.tabs{
+  display:flex;
+  margin-top:32px;
+  border-bottom:1px solid #444;
+}
+
+.tab{
+  flex:1;
+  padding:14px;
+  border:0;
+  border-radius:0;
+  color:#999;
+  font-weight:700;
+}
+
+.tab:hover{
+  background:#111;
+  color:#fff;
+}
+
+.tab.on{
+  color:#fff;
+  border-bottom:3px solid #fff;
+}
+
+.tab-content{
+  padding:24px 4px;
+}
+
+.description{
+  color:#ccc;
+  font-size:15px;
+  line-height:1.8;
+  white-space:pre-wrap;
+}
+
+.shop-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:18px;
+}
+
+.shop-head h2{
+  margin:0;
+}
+
+.coin-balance{
+  font-weight:800;
+}
+
+.shop-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr));
+  gap:14px;
+}
+
+.shop-item{
+  border:1px solid #444;
+  border-radius:12px;
+  padding:16px;
+  background:#080808;
+}
+
+.shop-item h3{
+  margin:0 0 8px;
+}
+
+.shop-item p{
+  color:#999;
+  min-height:42px;
+}
+
+.shop-bottom{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-top:16px;
+}
+
+.shop-price{
+  font-weight:800;
+}
+
+.shop-buy.owned{
+  color:#888;
+  border-color:#555;
+  cursor:default;
+}
+
+@media(max-width:750px){
+  .game-hero{
+    grid-template-columns:1fr;
+  }
+
+  .game-info h1{
+    font-size:26px;
+  }
+}
+</style>
+</head>
+<body>
+<header class="nav">
+  <a class="logo h" href="#/"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="4"/><path d="M10 7.5v9l7-4.5z" fill="#fff"/></svg>PLAYBOX</a>
+  <a class="h" href="#/">게임</a>
+  <button class="t" id="av">아바타</button>
+  <input id="q" type="search" placeholder="게임 검색" autocomplete="off">
+  <button class="chip" id="me"></button>
+</header>
+<main id="app"></main>
+<dialog id="dlg"></dialog>
+<script>
+const CONFIG={owner:'',repo:'',branch:'',skip:['index.html','404.html']};
+
+const $=s=>document.querySelector(s),app=$('#app'),dlg=$('#dlg');
+const get=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const put=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch{}};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>'&#'+c.charCodeAt(0)+';');
+const pretty=p=>decodeURIComponent(p.split('/').pop()).replace(/\.html?$/i,'').replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+
+let me={name:'Guest'+(1000+Math.random()*9000|0),skin:'#f1c27d',shirt:'#ffffff',pants:'#444444',face:0,hat:0,...get('playbox.profile',{})};
+if(!get('playbox.profile'))put('playbox.profile',me);
+let stats=get('playbox.stats',{});
+let favorites=get('playbox.favorites',[]);
+
+let games=[];
+let q='';
+let ready=false;
+let fail=false;
+let lastP=null;
+
+const OPT={skin:['#ffdbac','#f1c27d','#c68642','#8d5524','#5b3a1e','#cfcfcf'],shirt:['#ffffff','#bbbbbb','#555555','#111111','#e53935','#1e88e5','#43a047','#fdd835'],pants:['#ffffff','#999999','#444444','#111111','#1e3a8a','#6d4c41']};
+const FACE=['🙂','😐','😎','😮'],HAT=['없음','캡','왕관','비니'];
+const L='fill="none" stroke="#111" stroke-width="2.6" stroke-linecap="round"';
+const FACES=[
+ `<circle cx="42" cy="34" r="2.6"/><circle cx="58" cy="34" r="2.6"/><path d="M41 44q9 8 18 0" ${L}/>`,
+ `<circle cx="42" cy="34" r="2.6"/><circle cx="58" cy="34" r="2.6"/><path d="M42 46h16" ${L}/>`,
+ `<rect x="35" y="30" width="30" height="8" rx="3"/><path d="M42 46q8 5 16 0" ${L}/>`,
+ `<circle cx="42" cy="33" r="3"/><circle cx="58" cy="33" r="3"/><ellipse cx="50" cy="46" rx="4" ry="5"/>`];
+const HATS=['',
+ '<path d="M29 24q2-16 21-16t21 16z" fill="#e53935"/><rect x="26" y="22" width="48" height="5" rx="2" fill="#b71c1c"/>',
+ '<path d="M29 26l-2-18 12 8 11-12 11 12 12-8-2 18z" fill="#fdd835"/>',
+ '<path d="M29 26q0-18 21-18t21 18z" fill="#1e88e5"/><rect x="28" y="22" width="44" height="6" rx="3" fill="#1565c0"/>'];
+const avatar=(p,vb='0 0 100 150')=>`<svg viewBox="${vb}" xmlns="http://www.w3.org/2000/svg"><rect x="31" y="108" width="17" height="38" rx="3" fill="${p.pants}"/><rect x="52" y="108" width="17" height="38" rx="3" fill="${p.pants}"/><rect x="14" y="66" width="15" height="40" rx="6" fill="${p.skin}"/><rect x="71" y="66" width="15" height="40" rx="6" fill="${p.skin}"/><rect x="29" y="64" width="42" height="46" rx="5" fill="${p.shirt}"/><rect x="27" y="12" width="46" height="46" rx="12" fill="${p.skin}"/><g fill="#111">${FACES[p.face]}</g>${HATS[p.hat]}</svg>`;
+const BUST='15 4 70 70';
+const paint=()=>{
+  $('#me').innerHTML=avatar(me,BUST)+esc(me.name);
+};
+
+function edit(){
+  let d={...me};
+  const sw=[['skin','피부색'],['shirt','상의'],['pants','하의']].map(([k,t])=>`<label>${t}</label><div class="sw">${OPT[k].map(c=>`<button data-k="${k}" data-v="${c}" style="background:${c}" aria-label="${c}"></button>`).join('')}</div>`).join('');
+  const tx=[['face','표정',FACE],['hat','모자',HAT]].map(([k,t,a])=>`<label>${t}</label><div class="sw">${a.map((x,i)=>`<button class="t" data-k="${k}" data-v="${i}">${x}</button>`).join('')}</div>`).join('');
+  dlg.innerHTML=`
+  <div class="in">
+
+    <div class="ed">
+
+      ${avatar(d)}
+
+      <div>
+        <label>아이디 (닉네임)</label>
+
+        <input
+          id="nm"
+          maxlength="16"
+          value="${esc(d.name)}"
+        >
+
+        ${sw}
+        ${tx}
+      </div>
+
+    </div>
+
+    <div class="data-manage">
+
+      <b>데이터 관리</b>
+
+      <p>
+        프로필, 아바타, 즐겨찾기와 플레이 기록을
+        파일로 저장하거나 불러올 수 있습니다.
+      </p>
+
+      <div class="data-buttons">
+
+        <button id="exportData">
+          정보 내보내기
+        </button>
+
+        <button id="importData">
+          정보 불러오기
+        </button>
+
+      </div>
+
+      <input
+        type="file"
+        id="importFile"
+        accept=".json,application/json"
+        hidden
+      >
+
+    </div>
+
+    <div class="ft">
+
+      <button id="rnd">
+        랜덤
+      </button>
+
+      <button id="no">
+        취소
+      </button>
+
+      <button
+        id="ok"
+        style="background:#fff;color:#000">
+        저장
+      </button>
+
+    </div>
+
+  </div>
+`;
+  const sync=()=>{dlg.querySelector('.ed>svg').outerHTML=avatar(d);dlg.querySelectorAll('.sw button').forEach(b=>b.classList.toggle('on',String(d[b.dataset.k])===b.dataset.v))};
+  sync();
+  dlg.onclick=e=>{
+    if(e.target===dlg)return dlg.close();
+    const b=e.target.closest('.sw button');
+    if(b){d[b.dataset.k]=isNaN(b.dataset.v)?b.dataset.v:+b.dataset.v;sync()}
+  };
+  const pick=a=>a[Math.random()*a.length|0];
+  $('#rnd').onclick=()=>{d={...d,skin:pick(OPT.skin),shirt:pick(OPT.shirt),pants:pick(OPT.pants),face:pick(FACE.map((_,i)=>i)),hat:pick(HAT.map((_,i)=>i))};sync()};
+  $('#no').onclick=()=>dlg.close();
+
+$('#exportData').onclick=()=>{
+
+  const backup={
+    app:'PLAYBOX',
+    version:1,
+    exportedAt:new Date().toISOString(),
+
+    profile:me,
+    favorites:favorites,
+    stats:stats
+  };
+
+  const blob=new Blob(
+    [JSON.stringify(backup,null,2)],
+    {
+      type:'application/json'
+    }
+  );
+
+  const url=URL.createObjectURL(blob);
+
+  const a=document.createElement('a');
+
+  a.href=url;
+  a.download='playbox-backup.json';
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  a.remove();
+
+  URL.revokeObjectURL(url);
+
+};
+
+$('#importData').onclick=()=>{
+
+  $('#importFile').click();
+
+};
+
+$('#importFile').onchange=async e=>{
+
+  const file=e.target.files[0];
+
+  if(!file)
+    return;
+
+  try{
+
+    const text=await file.text();
+
+    const backup=JSON.parse(text);
+
+    if(
+      !backup ||
+      backup.app!=='PLAYBOX' ||
+      typeof backup.profile!=='object' ||
+      !Array.isArray(backup.favorites) ||
+      typeof backup.stats!=='object'
+    ){
+
+      throw new Error(
+        '올바른 PLAYBOX 백업 파일이 아닙니다.'
+      );
+
+    }
+
+    const ok=confirm(
+      '정보를 불러오면 현재 프로필, 즐겨찾기와 플레이 기록이 백업 파일의 정보로 변경됩니다.\n\n계속할까요?'
+    );
+
+    if(!ok){
+
+      e.target.value='';
+
+      return;
+
+    }
+
+    put(
+      'playbox.profile',
+      backup.profile
+    );
+
+    put(
+      'playbox.favorites',
+      backup.favorites
+    );
+
+    put(
+      'playbox.stats',
+      backup.stats
+    );
+
+    alert(
+      'PLAYBOX 정보를 불러왔습니다.'
+    );
+
+    location.reload();
+
+  }catch(err){
+
+    alert(
+      '정보를 불러올 수 없습니다.\n올바른 PLAYBOX 백업 파일인지 확인해주세요.'
+    );
+
+  }
+
+  e.target.value='';
+
+};
+
+$('#ok').onclick=()=>{
+
+  me={
+    ...d,
+    name:
+      $('#nm')
+        .value
+        .trim()
+        .slice(0,16)
+      ||me.name
+  };
+
+  put(
+    'playbox.profile',
+    me
+  );
+
+  dlg.close();
+
+  paint();
+
+  if(route().v!=='play')
+    render();
+
+};
+
+dlg.showModal();
+}
+async function discover(){
+  try{
+
+    const r=await fetch(
+      'games.json?time='+Date.now()
+    );
+
+    if(r.ok){
+
+      const j=await r.json();
+
+      if(Array.isArray(j)){
+
+        return j.map(x=>
+
+          typeof x==='string'
+
+            ? {
+                path:x,
+                title:pretty(x)
+              }
+
+            : {
+                title:x.title||pretty(x.path),
+                developer:x.developer||'알 수 없음',
+                description:x.description||'',
+                images:Array.isArray(x.images)
+                  ? x.images
+                  : [],
+                shop:Array.isArray(x.shop)
+                  ? x.shop
+                  : [],
+                ...x
+              }
+
+        );
+
+      }
+
+    }
+
+  }catch(e){}
+
+  try{
+
+    let{
+      owner,
+      repo
+    }=CONFIG;
+
+    const h=location.hostname;
+    const seg=location.pathname.split('/')[1]||'';
+
+    if(!owner&&h.endsWith('.github.io')){
+
+      owner=h.split('.')[0];
+
+      repo=
+        !seg||seg.includes('.')
+          ? h
+          : seg;
+
+    }
+
+    if(!owner||!repo)
+      throw 0;
+
+    let r;
+
+    for(const b of CONFIG.branch?[CONFIG.branch]:['HEAD','main','master']){
+      r=await fetch(`https://api.github.com/repos/${owner}/${repo}/git/trees/${b}?recursive=1`);
+      if(r.ok)break;
+    }
+
+    if(!r.ok)
+      throw 0;
+
+    const files=
+      (await r.json())
+        .tree
+        .filter(f=>f.type==='blob')
+        .map(f=>f.path);
+
+    const self=
+      location.pathname.split('/').pop()||
+      'index.html';
+
+    const imgs=files.filter(f=>/\.(png|jpe?g|webp|gif|svg)$/i.test(f));
+    const list=files.filter(f=>/\.html?$/i.test(f)&&!CONFIG.skip.includes(f)&&f!==self&&!/(^|\/)[._]/.test(f)&&!/node_modules/.test(f))
+      .map(p=>({path:p,title:pretty(p),img:imgs.find(i=>i.replace(/\.\w+$/,'')===p.replace(/\.html?$/i,'')),images:[],shop:[],description:''}));
+
+    await Promise.all(list.map(g=>fetch(g.path).then(r=>r.text()).then(t=>{g.title=new DOMParser().parseFromString(t,'text/html').title.trim()||g.title;}).catch(()=>{})));
+
+    return list;
+
+  }catch(e){
+
+    throw e;
+
+  }
+
+}
+
+const hash=s=>{let h=2166136261;for(const c of s)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0};
+function thumb(g){
+  let h=hash(g.path)||1,r=()=>(h=Math.imul(h^h>>>15,2246822519)>>>0,h/4294967296),s='';
+  for(let i=0;i<12;i++){
+    const x=r()*100,y=r()*100,z=10+r()*34,o=.07+r()*.2,k=r()*3|0;
+    s+=k==0?`<circle cx="${x}" cy="${y}" r="${z/2}" fill="#fff" opacity="${o}"/>`
+     :k==1?`<rect x="${x}" y="${y}" width="${z}" height="${z}" fill="#fff" opacity="${o}" transform="rotate(${r()*90|0} ${x} ${y})"/>`
+     :`<path d="M${x} ${y}h${z}l${-z/2} ${z}z" fill="none" stroke="#fff" stroke-width="1.5" opacity="${o*3}"/>`;
+  }
+  return `<svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid slice">${s}<text x="50" y="64" text-anchor="middle" font-size="44" font-weight="800" fill="#fff" font-family="system-ui,sans-serif">${esc([...g.title.trim()][0]||'?')}</text></svg>`;
+}
+
+const route=()=>{const h=decodeURIComponent(location.hash.slice(1)).split('/');return{v:h[1]||'',a:h.slice(2).join('/')}};
+const card=g=>{
+  const cover=g.images?.[0]||g.img;
+
+  return `
+    <a class="card" href="#/game/${encodeURIComponent(g.path)}">
+      <div class="th">
+        ${cover
+          ? `<img src="${esc(cover)}" alt="" loading="lazy">`
+          : thumb(g)
+        }
+        <span class="pl">▶</span>
+      </div>
+
+      <b>${esc(g.title)}</b>
+      <small>▶ ${stats[g.path]?.n||0}회 플레이</small>
+    </a>
+  `;
+};
+const played=()=>games.filter(g=>stats[g.path]);
+const favorited=()=>games.filter(g=>favorites.includes(g.path));
+const SEC={
+  recent:[
+    '최근 플레이한 게임',
+    ()=>played().sort((a,b)=>stats[b.path].t-stats[a.path].t)
+  ],
+
+  favorite:[
+    '★ 즐겨찾기',
+    ()=>favorited()
+  ],
+
+  all:[
+    '모든 게임',
+    ()=>games
+  ],
+
+  top:[
+    '가장 많이 플레이한 게임',
+    ()=>played().sort((a,b)=>stats[b.path].n-stats[a.path].n)
+  ]
+};
+const grid=l=>l.length?`<div class="grid">${l.map(card).join('')}</div>`:'<div class="msg">해당하는 게임이 없습니다.</div>';
+const EMPTY='<div class="msg"><b>아직 게임이 없습니다.</b><br>같은 레포에 게임 .html 파일을 올린 뒤 새로고침하세요.</div>';
+const ERR='<div class="msg"><b>게임 목록을 불러오지 못했습니다.</b><br>GitHub Pages 주소(○○.github.io/레포/)로 열었는지 확인하세요. 다른 주소라면 코드 맨 위 CONFIG 에 owner / repo 를 입력하거나, 게임 경로 배열이 든 games.json 을 같이 올리세요.</div>';
+
+function render(){
+  if(!ready)return app.innerHTML='<div class="msg">게임 목록을 불러오는 중…</div>';
+  const r=route();
+  if(r.v==='game')return gameDetail(r.a);
+  if(r.v==='play')return play(r.a);
+  lastP=null;
+  if(q.trim()){const k=q.trim().toLowerCase();return app.innerHTML=`<div class="sh"><h2>“${esc(q.trim())}” 검색 결과</h2></div>`+grid(games.filter(g=>(g.title+g.path).toLowerCase().includes(k)))}
+  if(r.v==='list'&&SEC[r.a])return app.innerHTML=`<div class="sh"><h2>${SEC[r.a][0]}</h2><a href="#/">← 돌아가기</a></div>`+grid(SEC[r.a][1]());
+  let h=`<div class="hi">${avatar(me,BUST)}<div><h1>안녕하세요, ${esc(me.name)}님!</h1><p>게임 ${games.length}개 · 내 플레이 ${Object.values(stats).reduce((a,s)=>a+s.n,0)}회</p></div></div>`;
+  if(!games.length)return app.innerHTML=h+(fail?ERR:EMPTY);
+  for(const id of['recent','favorite','all','top']){const l=SEC[id][1]();if(l.length)h+=`<section><div class="sh"><h2>${SEC[id][0]}</h2><a href="#/list/${id}">모두 보기 →</a></div><div class="rw"><button class="ar" data-d="-1" aria-label="이전">‹</button><div class="tr">${l.map(card).join('')}</div><button class="ar" data-d="1" aria-label="다음">›</button></div></section>`;}
+  app.innerHTML=h;
+}
+
+let galleryTimer=null;
+function gameDetail(path){
+  clearInterval(galleryTimer);
+  const g=games.find(x=>x.path===path);
+  if(!g){app.innerHTML='<div class="msg">게임 정보를 찾을 수 없습니다.<br><br><a class="btn" href="#/">← 돌아가기</a></div>';return;}
+  const images=g.images||[];const favorite=favorites.includes(path);
+  app.innerHTML=`
+    <div class="game-detail">
+      <div class="game-hero">
+        <div class="gallery">
+          ${images.length?`<img id="galleryImage" src="${esc(images[0])}" alt="${esc(g.title)}">`:`<div class="gallery-empty">등록된 이미지가 없습니다.</div>`}
+          ${images.length>1?`<button class="gallery-btn prev" id="galleryPrev">‹</button><button class="gallery-btn next" id="galleryNext">›</button><div class="gallery-dots">${images.map((_,i)=>`<button class="gallery-dot ${i===0?'on':''}" data-slide="${i}"></button>`).join('')}</div>`:''}
+        </div>
+        <div class="game-info">
+          <h1>${esc(g.title)}</h1>
+          <div class="game-dev">개발: ${esc(g.developer||'알 수 없음')}</div>
+          <div class="game-meta">▶ ${stats[path]?.n||0}회 플레이</div>
+          <a class="btn play-big" href="#/play/${encodeURIComponent(path)}">▶ 플레이</a>
+          <button class="favorite-btn ${favorite?'on':''}" id="favoriteBtn">${favorite?'★ 즐겨찾기됨':'☆ 즐겨찾기'}</button>
+        </div>
+      </div>
+      <div class="tabs"><button class="tab on" data-tab="intro">소개</button><button class="tab" data-tab="shop">상점</button></div>
+      <div id="tabContent" class="tab-content"></div>
+    </div>
+  `;
+  let slide=0;
+  function showSlide(n){if(!images.length)return;slide=(n+images.length)%images.length;const image=$('#galleryImage');if(image)image.src=images[slide];document.querySelectorAll('.gallery-dot').forEach((dot,i)=>dot.classList.toggle('on',i===slide));}
+  function resetGalleryTimer(){clearInterval(galleryTimer);if(images.length>1)galleryTimer=setInterval(()=>showSlide(slide+1),5000);}
+  if(images.length>1){$('#galleryPrev').onclick=()=>{showSlide(slide-1);resetGalleryTimer();};$('#galleryNext').onclick=()=>{showSlide(slide+1);resetGalleryTimer();};document.querySelectorAll('.gallery-dot').forEach(dot=>{dot.onclick=()=>{showSlide(+dot.dataset.slide);resetGalleryTimer();};});resetGalleryTimer();}
+  $('#favoriteBtn').onclick=()=>{const index=favorites.indexOf(path);if(index===-1)favorites.push(path);else favorites.splice(index,1);put('playbox.favorites',favorites);gameDetail(path);};
+  function intro(){$('#tabContent').innerHTML=`<h2>설명</h2><div class="description">${esc(g.description||'등록된 게임 설명이 없습니다.')}</div>`;}
+  function shop(){$('#tabContent').innerHTML=`<div class="shop-head"><h2>상점</h2></div><div class="msg"><b>상점 준비 중</b><br>게임 아이템 상점은 추후 추가될 예정입니다.</div>`;}
+  document.querySelectorAll('.tab').forEach(tab=>{tab.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));tab.classList.add('on');if(tab.dataset.tab==='intro')intro();if(tab.dataset.tab==='shop')shop();};});
+
+  intro();
+}
+function play(path){clearInterval(galleryTimer);const g=games.find(x=>x.path===path)||{path,title:pretty(path)};if(lastP!==path){stats[path]={n:(stats[path]?.n||0)+1,t:Date.now()};put('playbox.stats',stats);lastP=path;}app.innerHTML=`<div class="pb"><a class="btn" href="#/game/${encodeURIComponent(path)}">← 게임 정보</a><b>${esc(g.title)}</b><button id="rl">새로고침</button><button id="fs">전체화면</button></div><iframe id="gf" src="${esc(path)}" allow="autoplay; fullscreen; gamepad" allowfullscreen></iframe>`;const f=$('#gf');f.onload=()=>{try{f.contentWindow.focus();}catch{}};$('#rl').onclick=()=>{f.src=f.src;};$('#fs').onclick=()=>{f.requestFullscreen&&f.requestFullscreen();};}
+app.addEventListener('click',e=>{
+  const b=e.target.closest('.ar');
+  if(b){const t=b.parentNode.querySelector('.tr');t.scrollBy({left:b.dataset.d*t.clientWidth*.8,behavior:'smooth'})}
+});
+document.querySelectorAll('.h').forEach(a=>a.onclick=()=>{q='';$('#q').value='';if(location.hash==='#/'||!location.hash)render()});
+$('#av').onclick=$('#me').onclick=edit;
+$('#q').oninput=e=>{q=e.target.value;route().v==='play'?location.hash='#/':render()};
+
+window.addEventListener('message',e=>{
+
+  const frame=$('#gf');
+
+  if(!frame || e.source!==frame.contentWindow)
+    return;
+
+  if(e.origin!==location.origin)
+    return;
+
+  const data=e.data;
+
+  if(!data || typeof data!=='object')
+    return;
+
+  if(data.type==='PLAYBOX_GET_PROFILE'){
+
+    e.source.postMessage({
+
+      type:'PLAYBOX_PROFILE',
+
+      profile:{
+        name:me.name,
+        skin:me.skin,
+        shirt:me.shirt,
+        pants:me.pants,
+        face:me.face,
+        hat:me.hat
+      }
+
+    },location.origin);
+
+  }
+
+});
+addEventListener('hashchange',render);
+
+paint();render();
+(async()=>{
+  try{games=(await discover()).sort((a,b)=>a.title.localeCompare(b.title,'ko'))}catch{fail=true}
+  ready=true;render();
+})();
+</script>
+</body>
+</html>

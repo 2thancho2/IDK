@@ -1,0 +1,1978 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>소환된자의 골목</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg-void:#080a12;
+  --bg-panel:#0f1420;
+  --bg-panel2:#141b2b;
+  --line:#232c42;
+  --gold:#c8aa6e;
+  --gold-bright:#f0e6d2;
+  --ember:#ff6b3d;
+  --teal:#2ee6a6;
+  --blue-team:#3fa9ff;
+  --red-team:#ff4d5e;
+  --text-dim:#8a93a8;
+  --text:#e7e9ef;
+  --danger:#ff4d5e;
+  --shadow-heavy: 0 20px 60px rgba(0,0,0,.55);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;height:100%;background:var(--bg-void);color:var(--text);font-family:'Inter',sans-serif;overflow:hidden;}
+.font-display{font-family:'Cinzel',serif;}
+::selection{background:var(--ember);color:#111;}
+
+/* ---------- background atmosphere ---------- */
+#bgFx{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:
+    radial-gradient(1200px 700px at 15% 10%, rgba(63,169,255,.10), transparent 60%),
+    radial-gradient(1200px 700px at 85% 90%, rgba(255,77,94,.10), transparent 60%),
+    linear-gradient(180deg,#080a12 0%,#0a0e18 60%,#080a12 100%);
+}
+#bgFx::after{content:"";position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(200,170,110,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(200,170,110,.035) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image:radial-gradient(circle at 50% 40%, black, transparent 75%);
+}
+
+/* ---------- generic screen wrap ---------- */
+.screen{position:fixed;inset:0;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.hidden{display:none !important;}
+
+/* ---------- start / draft screen ---------- */
+#startScreen{padding:24px;overflow-y:auto;}
+.brand{text-align:center;margin-bottom:22px;}
+.brand h1{font-family:'Cinzel',serif;font-weight:900;font-size:clamp(28px,5vw,46px);letter-spacing:.10em;margin:0;
+  background:linear-gradient(180deg,var(--gold-bright),var(--gold) 60%,#8a733f);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  text-shadow:0 2px 24px rgba(200,170,110,.25);}
+.brand p{color:var(--text-dim);letter-spacing:.25em;font-size:11px;text-transform:uppercase;margin:6px 0 0;}
+
+.draft-card{width:min(920px,94vw);background:linear-gradient(180deg,var(--bg-panel),var(--bg-panel2));
+  border:1px solid var(--line);border-radius:14px;padding:26px 26px 22px;box-shadow:var(--shadow-heavy);position:relative;}
+.draft-card::before{content:"";position:absolute;left:0;right:0;top:0;height:3px;border-radius:14px 14px 0 0;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+
+.step-label{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.step-num{font-family:'Cinzel',serif;font-weight:700;color:var(--ember);font-size:13px;letter-spacing:.15em;}
+.step-title{font-size:15px;font-weight:700;color:var(--gold-bright);letter-spacing:.03em;}
+.step-sub{color:var(--text-dim);font-size:12.5px;margin:-8px 0 14px 0;}
+
+.choice-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:22px;}
+.choice-btn{flex:1;min-width:120px;background:#101623;border:1px solid var(--line);color:var(--text);
+  padding:12px 10px;border-radius:9px;cursor:pointer;font-size:13.5px;font-weight:600;text-align:center;
+  transition:.15s;position:relative;}
+.choice-btn:hover{border-color:var(--gold);transform:translateY(-2px);}
+.choice-btn.selected{background:linear-gradient(180deg,rgba(200,170,110,.18),rgba(200,170,110,.05));border-color:var(--gold);color:var(--gold-bright);box-shadow:0 0 0 1px var(--gold) inset;}
+.choice-btn small{display:block;color:var(--text-dim);font-weight:400;font-size:11px;margin-top:3px;}
+.choice-btn.selected small{color:#d8c9a0;}
+
+.pos-icon{font-size:20px;display:block;margin-bottom:4px;}
+
+.champ-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:8px;}
+.champ-card{background:#0d121d;border:1px solid var(--line);border-radius:10px;padding:12px;cursor:pointer;transition:.15s;text-align:left;}
+.champ-card:hover{transform:translateY(-3px);border-color:var(--accent,var(--gold));}
+.champ-card.selected{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset, 0 8px 24px rgba(0,0,0,.4);background:linear-gradient(180deg,rgba(255,255,255,.04),transparent);}
+.champ-portrait{width:100%;aspect-ratio:1/1;border-radius:8px;margin-bottom:8px;position:relative;overflow:hidden;
+  background:radial-gradient(circle at 35% 30%, color-mix(in srgb, var(--accent) 55%, white 10%), color-mix(in srgb, var(--accent) 80%, black 40%) 70%);
+  display:flex;align-items:center;justify-content:center;font-family:'Cinzel',serif;font-weight:900;font-size:30px;color:rgba(0,0,0,.35);}
+.champ-name{font-weight:700;font-size:13.5px;color:var(--text);}
+.champ-role{font-size:11px;color:var(--text-dim);margin-top:1px;}
+.champ-kit{display:flex;gap:4px;margin-top:7px;}
+.kit-tag{font-size:9.5px;background:#1a2233;border:1px solid var(--line);border-radius:4px;padding:2px 4px;color:var(--text-dim);}
+
+.team-preview{display:flex;gap:18px;margin-top:6px;flex-wrap:wrap;}
+.team-col{flex:1;min-width:220px;background:#0d1220;border:1px solid var(--line);border-radius:10px;padding:10px 12px;}
+.team-col h4{margin:0 0 8px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;}
+.team-col.blue h4{color:var(--blue-team);}
+.team-col.red h4{color:var(--red-team);}
+.slot-row{display:flex;align-items:center;gap:8px;font-size:12.5px;padding:4px 0;color:var(--text-dim);}
+.slot-row .dot{width:8px;height:8px;border-radius:50%;background:#333;flex:none;}
+.slot-row.filled .dot{background:var(--teal);}
+.slot-row.me{color:var(--gold-bright);font-weight:700;}
+
+.start-btn-row{display:flex;justify-content:flex-end;margin-top:18px;gap:10px;}
+#beginBtn{font-family:'Cinzel',serif;font-weight:700;letter-spacing:.08em;font-size:15px;
+  background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1305;border:none;
+  padding:13px 34px;border-radius:8px;cursor:pointer;box-shadow:0 8px 24px rgba(200,170,110,.25);transition:.15s;}
+#beginBtn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none;}
+#beginBtn:not(:disabled):hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(200,170,110,.35);}
+
+/* ---------- wizard (단계별 화면) ---------- */
+.wizard-progress{display:flex;align-items:center;gap:8px;margin-bottom:10px;}
+.wizard-progress .wp-step{flex:1;height:4px;border-radius:3px;background:#232c42;}
+.wizard-progress .wp-step.done{background:var(--gold);}
+.wizard-progress .wp-step.current{background:linear-gradient(90deg,var(--gold),#232c42 60%);}
+.wizard-labels{display:flex;justify-content:space-between;margin:0 0 22px;font-size:11px;color:var(--text-dim);letter-spacing:.04em;}
+.wizard-labels span.active{color:var(--gold-bright);font-weight:700;}
+
+.wizard-pane{display:none;}
+.wizard-pane.active{display:block;animation:paneIn .25s ease-out;}
+@keyframes paneIn{from{opacity:0;transform:translateX(16px);}to{opacity:1;transform:translateX(0);}}
+
+.nav-row{display:flex;justify-content:space-between;margin-top:20px;gap:10px;}
+.nav-btn{font-family:'Inter',sans-serif;font-weight:700;font-size:13.5px;letter-spacing:.03em;
+  background:#141b2b;border:1px solid var(--line);color:var(--text);padding:12px 26px;border-radius:8px;cursor:pointer;transition:.15s;}
+.nav-btn:hover:not(:disabled){border-color:var(--gold);transform:translateY(-2px);}
+.nav-btn:disabled{opacity:.3;cursor:not-allowed;}
+.nav-btn.next{background:linear-gradient(180deg,var(--gold-bright),var(--gold));color:#1a1305;border:none;}
+.nav-btn.next:disabled{opacity:.35;}
+.selected-summary{font-size:12px;color:var(--text-dim);margin-top:-6px;margin-bottom:16px;min-height:16px;}
+.selected-summary b{color:var(--gold-bright);}
+
+/* ---------- in game HUD ---------- */
+#gameScreen{inset:0;}
+#viewport{position:absolute;inset:0;background:#0a0e18;}
+canvas{display:block;}
+#gameCanvas{position:absolute;top:0;left:0;}
+
+#topBar{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:20;
+  display:flex;align-items:center;gap:16px;background:rgba(8,10,18,.72);backdrop-filter:blur(6px);
+  border:1px solid var(--line);border-radius:10px;padding:7px 18px;font-size:13px;}
+#timer{font-family:'Cinzel',serif;font-weight:700;letter-spacing:.05em;color:var(--gold-bright);}
+.score{display:flex;align-items:center;gap:6px;font-weight:700;}
+.score.blue{color:var(--blue-team);}
+.score.red{color:var(--red-team);}
+.tower-icon{opacity:.55;font-size:11px;}
+
+#killFeed{position:absolute;top:14px;right:14px;z-index:20;width:260px;display:flex;flex-direction:column;gap:5px;pointer-events:none;}
+.feed-item{background:rgba(8,10,18,.78);border-left:3px solid var(--ember);border-radius:5px;padding:5px 10px;font-size:12px;
+  animation:feedIn .25s ease-out;color:var(--text-dim);}
+.feed-item b{color:var(--text);}
+@keyframes feedIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+#toast{position:absolute;top:70px;left:50%;transform:translateX(-50%);z-index:30;
+  background:rgba(20,10,10,.85);border:1px solid var(--danger);color:#ffd8da;padding:9px 20px;border-radius:8px;
+  font-size:13px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;}
+#toast.show{opacity:1;}
+
+#minimapWrap{position:absolute;left:14px;bottom:14px;z-index:20;border:1px solid var(--line);border-radius:8px;
+  background:rgba(8,10,18,.6);padding:6px;}
+#minimap{display:block;border-radius:4px;}
+
+/* bottom HUD */
+#bottomHud{position:absolute;left:0;right:0;bottom:0;z-index:20;display:flex;align-items:flex-end;justify-content:center;
+  gap:18px;padding:10px 14px 12px;pointer-events:none;}
+#bottomHud > *{pointer-events:auto;}
+
+.resource-block{width:260px;background:rgba(8,10,18,.72);border:1px solid var(--line);border-radius:10px;padding:10px 12px;backdrop-filter:blur(6px);}
+.champ-title{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px;}
+.champ-title b{font-size:13.5px;color:var(--gold-bright);}
+.lvl-pill{font-size:11px;background:#1a2233;border:1px solid var(--line);border-radius:5px;padding:1px 7px;color:var(--text-dim);}
+.bar{height:13px;border-radius:4px;background:#1a1015;overflow:hidden;position:relative;margin-bottom:5px;border:1px solid rgba(0,0,0,.4);}
+.bar .fill{height:100%;transition:width .15s;}
+.bar.hp .fill{background:linear-gradient(180deg,#4fdc7a,#1f8c46);}
+.bar.mp .fill{background:linear-gradient(180deg,#5db8ff,#1f6fbf);}
+.bar .label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9.5px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000;}
+.bar.xp{height:5px;background:#1a1a26;}
+.bar.xp .fill{background:linear-gradient(90deg,var(--gold),var(--gold-bright));}
+.gold-row{display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--text-dim);}
+.gold-row b{color:var(--gold-bright);}
+
+#abilityBar{display:flex;gap:8px;align-items:flex-end;}
+.slot{width:56px;height:56px;border-radius:10px;background:#12182a;border:2px solid var(--line);position:relative;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;text-align:center;overflow:hidden;user-select:none;}
+.slot .key{position:absolute;top:2px;left:4px;font-size:10px;font-weight:800;color:var(--gold);}
+.slot .nm{font-size:9px;font-weight:700;color:var(--text);padding:0 3px;line-height:1.15;margin-top:6px;}
+.slot .cd{position:absolute;inset:0;background:rgba(0,0,0,.72);display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:800;color:#fff;}
+.slot.ready{border-color:var(--gold);box-shadow:0 0 10px rgba(200,170,110,.35);}
+.slot.spell{width:48px;height:48px;}
+.slot.spell .nm{margin-top:2px;}
+
+#shopHint{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);z-index:20;
+  background:rgba(8,10,18,.75);border:1px solid var(--gold);border-radius:8px;padding:6px 16px;font-size:12px;color:var(--gold-bright);
+  opacity:0;transition:opacity .2s;pointer-events:none;}
+#shopHint.show{opacity:1;}
+
+/* shop modal */
+#shopModal{z-index:40;background:rgba(3,4,8,.72);backdrop-filter:blur(3px);}
+.shop-panel{width:min(760px,94vw);max-height:82vh;overflow-y:auto;background:linear-gradient(180deg,var(--bg-panel),var(--bg-panel2));
+  border:1px solid var(--gold);border-radius:14px;padding:22px;box-shadow:var(--shadow-heavy);}
+.shop-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;}
+.shop-head h2{font-family:'Cinzel',serif;margin:0;color:var(--gold-bright);font-size:20px;letter-spacing:.05em;}
+.shop-gold{color:var(--gold);font-weight:700;}
+.item-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.item-card{background:#0d121d;border:1px solid var(--line);border-radius:9px;padding:10px;cursor:pointer;transition:.12s;}
+.item-card:hover{border-color:var(--gold);transform:translateY(-2px);}
+.item-card.owned{opacity:.45;cursor:default;}
+.item-card.cant{opacity:.5;}
+.item-name{font-weight:700;font-size:13px;margin-bottom:3px;}
+.item-stat{font-size:11px;color:var(--teal);margin-bottom:6px;}
+.item-cost{font-size:12px;color:var(--gold);font-weight:700;}
+.shop-close{margin-top:16px;width:100%;padding:10px;background:#1a2233;border:1px solid var(--line);color:var(--text);
+  border-radius:8px;cursor:pointer;font-weight:600;}
+.shop-close:hover{border-color:var(--gold);}
+
+/* game over */
+#gameOverScreen{z-index:50;background:rgba(3,3,6,.88);}
+#gameOverScreen h1{font-family:'Cinzel',serif;font-size:56px;letter-spacing:.1em;margin:0 0 10px;}
+#gameOverScreen h1.victory{color:var(--blue-team);text-shadow:0 0 40px rgba(63,169,255,.6);}
+#gameOverScreen h1.defeat{color:var(--red-team);text-shadow:0 0 40px rgba(255,77,94,.6);}
+#gameOverScreen p{color:var(--text-dim);margin-bottom:24px;}
+#restartBtn{font-family:'Cinzel',serif;font-weight:700;background:linear-gradient(180deg,var(--gold-bright),var(--gold));
+  color:#1a1305;border:none;padding:13px 34px;border-radius:8px;cursor:pointer;font-size:15px;letter-spacing:.05em;}
+
+.help-tip{position:absolute;top:12px;left:14px;z-index:20;background:rgba(8,10,18,.65);border:1px solid var(--line);
+  border-radius:8px;padding:8px 12px;font-size:11px;color:var(--text-dim);line-height:1.6;max-width:210px;}
+.help-tip b{color:var(--gold-bright);}
+
+@media (max-width:780px){
+  .resource-block{width:190px;}
+  .slot{width:46px;height:46px;}
+  .slot.spell{width:40px;height:40px;}
+  #killFeed{width:180px;}
+  .help-tip{display:none;}
+}
+</style>
+</head>
+<body>
+<div id="bgFx"></div>
+
+<!-- ============ START / DRAFT SCREEN ============ -->
+<div id="startScreen" class="screen">
+  <div class="brand">
+    <h1>소환된자의 골목</h1>
+  </div>
+
+  <div class="draft-card">
+    <div class="wizard-progress">
+      <div class="wp-step" data-wp="1"></div>
+      <div class="wp-step" data-wp="2"></div>
+      <div class="wp-step" data-wp="3"></div>
+    </div>
+    <div class="wizard-labels">
+      <span data-wl="1">1. 난이도</span>
+      <span data-wl="2">2. 포지션</span>
+      <span data-wl="3">3. 챔피언 &amp; 시작</span>
+    </div>
+
+    <!-- STEP 1: 난이도 -->
+    <div class="wizard-pane" id="pane1">
+      <div class="step-label"><span class="step-num">STEP 1</span><span class="step-title">난이도 선택</span></div>
+      <div class="choice-row" id="diffRow">
+        <button class="choice-btn" data-diff="easy"><b>1</b><small>쉬움ㅇㅇ</small></button>
+        <button class="choice-btn" data-diff="normal"><b>2</b><small>보통 ㅇㅇ</small></button>
+        <button class="choice-btn" data-diff="hard"><b>3</b><small>보통보단 어려움</small></button>
+      </div>
+      <div class="nav-row">
+        <span></span>
+        <button class="nav-btn next" id="toStep2" disabled>다음 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: 포지션 -->
+    <div class="wizard-pane" id="pane2">
+      <div class="step-label"><span class="step-num">STEP 2</span><span class="step-title">포지션 선택</span></div>
+      <div class="step-sub">선택하지 않은 나머지 포지션은 AI가 자동으로 채웁니다.</div>
+      <div class="choice-row" id="posRow">
+        <button class="choice-btn" data-pos="top"><span class="pos-icon">⚔️</span><b>윗 골목</b><small>탑</small></button>
+        <button class="choice-btn" data-pos="jungle"><span class="pos-icon">🌲</span><b>숲</b><small>정글</small></button>
+        <button class="choice-btn" data-pos="mid"><span class="pos-icon">🔮</span><b>가운데 골목</b><small>미드</small></button>
+        <button class="choice-btn" data-pos="adc"><span class="pos-icon">🏹</span><b>아랫 골목</b><small>원딜</small></button>
+        <button class="choice-btn" data-pos="support"><span class="pos-icon">🛡️</span><b>몸빵</b><small>서포터</small></button>
+      </div>
+      <div class="nav-row">
+        <button class="nav-btn" id="toStep1b">← 이전</button>
+        <button class="nav-btn next" id="toStep3" disabled>다음 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: 챔피언 + 미리보기 + 시작 -->
+    <div class="wizard-pane" id="pane3">
+      <div class="step-label"><span class="step-num">STEP 3</span><span class="step-title">챔피언 선택</span></div>
+      <div class="champ-grid" id="champGrid"></div>
+      <div class="selected-summary" id="champSummary"></div>
+
+      <div class="step-label" style="margin-top:10px;"><span class="step-num">PREVIEW</span><span class="step-title">팀 구성 미리보기</span></div>
+      <div class="team-preview">
+        <div class="team-col blue"><h4>블루팀 (아군)</h4><div id="bluePreview"></div></div>
+        <div class="team-col red"><h4>레드팀 (적)</h4><div id="redPreview"></div></div>
+      </div>
+
+      <div class="nav-row">
+        <button class="nav-btn" id="toStep2b">← 이전</button>
+        <button id="beginBtn" disabled>전투 시작</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ GAME SCREEN ============ -->
+<div id="gameScreen" class="screen hidden">
+  <div id="viewport">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+
+  <div class="help-tip">
+    <b>조작법</b><br>
+    이동: 우클릭 / WASD&nbsp;&nbsp;공격: 좌클릭<br>
+    스킬: Q W E R&nbsp;&nbsp;회복: F&nbsp;&nbsp;탈진: D<br>
+    상점: P (기지 근처)
+  </div>
+
+  <div id="topBar">
+    <div class="score blue"><span class="tower-icon">🗼</span><span id="blueTowerCount">3</span> &nbsp;<span id="blueKills">0</span> 킬</div>
+    <div id="timer">00:00</div>
+    <div class="score red"><span id="redKills">0</span> 킬&nbsp; <span id="redTowerCount">3</span><span class="tower-icon">🗼</span></div>
+  </div>
+
+  <div id="killFeed"></div>
+  <div id="toast"></div>
+  <div id="shopHint">P 를 눌러 상점을 여세요</div>
+
+  <div id="minimapWrap"><canvas id="minimap" width="160" height="160"></canvas></div>
+
+  <div id="bottomHud">
+    <div class="resource-block">
+      <div class="champ-title"><b id="hudName">챔피언</b><span class="lvl-pill">Lv.<span id="hudLevel">1</span></span></div>
+      <div class="bar hp"><div class="fill" id="hpFill" style="width:100%"></div><div class="label" id="hpLabel">600/600</div></div>
+      <div class="bar mp"><div class="fill" id="mpFill" style="width:100%"></div><div class="label" id="mpLabel">300/300</div></div>
+      <div class="bar xp"><div class="fill" id="xpFill" style="width:0%"></div></div>
+      <div class="gold-row"><span>골드</span><b id="hudGold">500</b></div>
+    </div>
+
+    <div id="abilityBar">
+      <div class="slot spell" id="slotHeal"><span class="key">F</span><span class="nm">회복</span></div>
+      <div class="slot spell" id="slotExhaust"><span class="key">D</span><span class="nm">탈진</span></div>
+      <div class="slot" id="slotQ"><span class="key">Q</span><span class="nm">-</span></div>
+      <div class="slot" id="slotW"><span class="key">W</span><span class="nm">-</span></div>
+      <div class="slot" id="slotE"><span class="key">E</span><span class="nm">-</span></div>
+      <div class="slot" id="slotR"><span class="key">R</span><span class="nm">-</span></div>
+    </div>
+
+    <div class="resource-block" style="width:150px;text-align:center;">
+      <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">상점 (P)</div>
+      <div style="font-size:22px;">🛒</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ SHOP MODAL ============ -->
+<div id="shopModal" class="screen hidden">
+  <div class="shop-panel">
+    <div class="shop-head">
+      <h2>상점</h2>
+      <div class="shop-gold">보유 골드: <span id="shopGold">0</span>g</div>
+    </div>
+    <div class="item-grid" id="itemGrid"></div>
+    <button class="shop-close" id="closeShopBtn">닫기 (P)</button>
+  </div>
+</div>
+
+<!-- ============ GAME OVER ============ -->
+<div id="gameOverScreen" class="screen hidden">
+  <h1 id="resultTitle" class="font-display">VICTORY</h1>
+  <p id="resultSub">넥서스를 파괴했습니다!</p>
+  <button id="restartBtn">다시 시작</button>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   RIFT ARENA — 웹 5v5 MOBA 프로토타입
+   순수 HTML/CSS/JS (외부 라이브러리 없음)
+===================================================================== */
+
+/* ---------------------------------------------------------------
+   0. 유틸리티
+--------------------------------------------------------------- */
+let __uid = 1;
+const uid = () => __uid++;
+const rand = (a, b) => a + Math.random() * (b - a);
+const randInt = (a, b) => Math.floor(rand(a, b + 1));
+const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+const dist2 = (ax, ay, bx, by) => Math.hypot(ax - bx, ay - by);
+function normalize(dx, dy) {
+  const len = Math.hypot(dx, dy) || 1;
+  return { x: dx / len, y: dy / len, len: Math.hypot(dx, dy) };
+}
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+/* ---------------------------------------------------------------
+   1. 맵 & 상수
+--------------------------------------------------------------- */
+const WORLD = 2400;
+
+const FOUNTAIN = {
+  blue: { x: 150, y: 2250 },
+  red: { x: 2250, y: 150 }
+};
+
+// 각 라인 웨이포인트: blue 시점(블루 기지 -> 레드 기지 방향)
+const PATHS = {
+  top: [{ x: 260, y: 2150 }, { x: 260, y: 260 }, { x: 2150, y: 260 }],
+  mid: [{ x: 260, y: 2150 }, { x: 1200, y: 1200 }, { x: 2150, y: 260 }],
+  bot: [{ x: 260, y: 2150 }, { x: 2150, y: 2150 }, { x: 2150, y: 260 }]
+};
+
+function pathFor(team, lane) {
+  const p = PATHS[lane];
+  return team === 'blue' ? p : [...p].reverse();
+}
+
+const TOWER_DEFS = [
+  { team: 'blue', lane: 'top', x: 300, y: 1450 },
+  { team: 'blue', lane: 'mid', x: 820, y: 1620 },
+  { team: 'blue', lane: 'bot', x: 1500, y: 2100 },
+  { team: 'red', lane: 'top', x: 1700, y: 300 },
+  { team: 'red', lane: 'mid', x: 1600, y: 800 },
+  { team: 'red', lane: 'bot', x: 2100, y: 950 }
+];
+
+const JUNGLE_CAMP_DEFS = [
+  { x: 700, y: 950, name: '늑대 무리' },
+  { x: 950, y: 1750, name: '바위 게' },
+  { x: 1700, y: 700, name: '유령 무리' },
+  { x: 1450, y: 1450, name: '고대 드레이크' }
+];
+
+const POSITIONS = ['top', 'jungle', 'mid', 'adc', 'support'];
+const POS_LABEL = { top: '탑', jungle: '정글', mid: '미드', adc: '원딜', support: '서포터' };
+const POS_LANE = { top: 'top', jungle: null, mid: 'mid', adc: 'bot', support: 'bot' };
+
+/* ---------------------------------------------------------------
+   2. 챔피언 정의
+--------------------------------------------------------------- */
+const CHAMPIONS = [
+  {
+    id: 'fireblade', name: '파이어블레이드', role: '전사', color: '#ff6b3d', letter: '火',
+    base: { hp: 640, mp: 250, ad: 68, ap: 0, armor: 38, speed: 175, range: 65, hpRegen: 1.5, mpRegen: 0.8 },
+    growth: { hp: 90, mp: 20, ad: 3.5, armor: 3.2 },
+    abilities: {
+      q: { name: '화염 돌격', type: 'dash', cd: 7, cost: 30, range: 260, damage: 95, dmgType: 'ad', hitRadius: 110, desc: '전방 돌진, 경로의 적에게 물리피해' },
+      w: { name: '열화 방패', type: 'shield_self', cd: 16, cost: 45, amount: 160, duration: 3, desc: '피해를 흡수하는 보호막' },
+      e: { name: '작열 파동', type: 'aoe_self', cd: 11, cost: 55, radius: 190, damage: 75, dmgType: 'ap', slow: 40, slowDuration: 2, desc: '주변 적에게 피해+둔화' },
+      r: { name: '인페르노 노바', type: 'aoe_self', cd: 80, cost: 100, radius: 300, damage: 280, dmgType: 'ap', desc: '광역 대폭발' }
+    }
+  },
+  {
+    id: 'frostbow', name: '프로스트보우', role: '원거리 딜러', color: '#5dc8ff', letter: '氷',
+    base: { hp: 540, mp: 280, ad: 62, ap: 0, armor: 26, speed: 180, range: 520, hpRegen: 1.0, mpRegen: 1.2 },
+    growth: { hp: 75, mp: 25, ad: 3.6, armor: 2.6 },
+    abilities: {
+      q: { name: '관통 화살', type: 'projectile', cd: 6, cost: 35, speed: 900, range: 800, damage: 100, dmgType: 'ad', hitRadius: 26, pierce: true, desc: '관통하는 화살' },
+      w: { name: '서리 함정', type: 'aoe_point', cd: 13, cost: 45, radius: 170, damage: 60, dmgType: 'ap', slow: 50, slowDuration: 2.5, range: 750, desc: '지정 위치에 둔화 지대 생성' },
+      e: { name: '질주', type: 'buff_self', cd: 15, cost: 30, speedAmount: 110, duration: 2.5, desc: '이동 속도 증가' },
+      r: { name: '윈터스 볼리', type: 'projectile', cd: 85, cost: 100, speed: 1100, range: 1400, damage: 260, dmgType: 'ad', hitRadius: 34, pierce: true, desc: '초장거리 관통 사격' }
+    }
+  },
+  {
+    id: 'shadowmage', name: '섀도우메이지', role: '마법사', color: '#b06bff', letter: '幻',
+    base: { hp: 520, mp: 380, ad: 48, ap: 70, armor: 24, speed: 175, range: 550, hpRegen: 0.9, mpRegen: 1.6 },
+    growth: { hp: 70, mp: 35, ad: 2.2, ap: 5.0, armor: 2.4 },
+    abilities: {
+      q: { name: '섀도우 볼트', type: 'projectile', cd: 6, cost: 45, speed: 850, range: 750, damage: 85, dmgType: 'ap', hitRadius: 28, desc: '기본 투사체 마법 공격' },
+      w: { name: '점멸 이동', type: 'blink', cd: 14, cost: 50, range: 320, desc: '순간이동으로 위치 이동' },
+      e: { name: '속박의 손아귀', type: 'projectile_cc', cd: 10, cost: 55, speed: 750, range: 650, damage: 60, dmgType: 'ap', hitRadius: 28, cc: 'root', ccDuration: 1.4, desc: '적중시 이동불가' },
+      r: { name: '심연의 폭발', type: 'aoe_point', cd: 90, cost: 110, radius: 260, damage: 320, dmgType: 'ap', range: 800, desc: '광역 대미지 궁극기' }
+    }
+  },
+  {
+    id: 'ironwall', name: '아이언월', role: '수호자', color: '#c8aa6e', letter: '盾',
+    base: { hp: 760, mp: 300, ad: 52, ap: 0, armor: 55, speed: 170, range: 135, hpRegen: 2.0, mpRegen: 1.0 },
+    growth: { hp: 110, mp: 22, ad: 2.6, armor: 4.2 },
+    abilities: {
+      q: { name: '제압의 강타', type: 'stun_self_area', cd: 12, cost: 40, radius: 155, damage: 50, dmgType: 'ad', ccDuration: 1.2, desc: '주변 적을 기절시킴' },
+      w: { name: '보호막 부여', type: 'shield_ally', cd: 14, cost: 45, amount: 180, duration: 3.5, range: 320, desc: '자신과 가까운 아군에게 보호막' },
+      e: { name: '돌진 강타', type: 'dash', cd: 11, cost: 45, range: 240, damage: 60, dmgType: 'ad', hitRadius: 110, stunOnHit: true, ccDuration: 1.0, desc: '돌진 후 기절 부여' },
+      r: { name: '수호의 결계', type: 'heal_allies_shield', cd: 95, cost: 100, radius: 280, healAmount: 200, shieldAmount: 200, duration: 4, desc: '주변 아군 치유+보호막' }
+    }
+  },
+  {
+    id: 'windrunner', name: '윈드러너', role: '암살자', color: '#2ee6a6', letter: '風',
+    base: { hp: 560, mp: 260, ad: 70, ap: 0, armor: 30, speed: 195, range: 65, hpRegen: 1.2, mpRegen: 1.0 },
+    growth: { hp: 78, mp: 20, ad: 3.8, armor: 2.8 },
+    abilities: {
+      q: { name: '그림자 습격', type: 'dash', cd: 8, cost: 35, range: 280, damage: 100, dmgType: 'ad', hitRadius: 100, desc: '적에게 돌진 공격' },
+      w: { name: '바람의 은신', type: 'buff_self', cd: 18, cost: 40, speedAmount: 130, duration: 2, evasion: 0.4, desc: '가속 + 회피율 증가' },
+      e: { name: '유혈 강타', type: 'aoe_self', cd: 9, cost: 35, radius: 115, damage: 65, dmgType: 'ad', desc: '주변 적에게 출혈 피해' },
+      r: { name: '마무리 일격', type: 'execute', cd: 60, cost: 80, range: 190, damage: 180, dmgType: 'ad', executeMult: 2.5, executeThreshold: 0.35, desc: '체력이 낮은 적 처형' }
+    }
+  }
+];
+const CHAMP_BY_ID = Object.fromEntries(CHAMPIONS.map(c => [c.id, c]));
+
+/* ---------------------------------------------------------------
+   3. 아이템(상점)
+--------------------------------------------------------------- */
+const ITEMS = [
+  { id: 'longsword', name: '롱소드', cost: 350, statText: '공격력 +15', apply: u => { u.ad += 15; } },
+  { id: 'tome', name: '마법 서적', cost: 400, statText: '주문력 +25', apply: u => { u.ap += 25; } },
+  { id: 'clotharmor', name: '천 갑옷', cost: 300, statText: '방어력 +22', apply: u => { u.armor += 22; } },
+  { id: 'ruby', name: '루비 수정', cost: 400, statText: '체력 +220', apply: u => { u.maxHp += 220; u.hp += 220; } },
+  { id: 'boots', name: '신속의 장화', cost: 500, statText: '이동속도 +45', apply: u => { u.speed += 45; } },
+  { id: 'sapphire', name: '사파이어 수정', cost: 350, statText: '마나 +180', apply: u => { u.maxMp += 180; u.mp += 180; } },
+  { id: 'infinity', name: '무한의 검', cost: 1000, statText: '공격력 +35', apply: u => { u.ad += 35; } },
+  { id: 'rabadon', name: '대마법사의 모자', cost: 1200, statText: '주문력 +60', apply: u => { u.ap += 60; } }
+];
+
+/* ---------------------------------------------------------------
+   4. 전역 상태
+--------------------------------------------------------------- */
+const G = {
+  time: 0,            // ms, 게임 클럭 (일시정지 영향 없음)
+  running: false,
+  paused: false,
+  difficulty: 'normal',
+  playerPosition: null,
+  playerChampionId: null,
+  units: [],           // 챔피언 유닛 (10)
+  minions: [],
+  projectiles: [],
+  towers: [],
+  nexuses: [],
+  jungleCamps: [],
+  killFeed: [],
+  particles: [],       // 시각효과(피해숫자, 원 텔레그래프 등)
+  camera: { x: 1200, y: 1200 },
+  mouseWorld: { x: 0, y: 0 },
+  mouseScreen: { x: 0, y: 0 },
+  keys: {},
+  player: null,
+  gameOver: false,
+  waveTimer: 0,
+  canvas: null, ctx: null, mini: null, mctx: null,
+  vw: 960, vh: 640
+};
+
+const DIFF_CFG = {
+  easy: { aiInterval: 700, aggro: 0.18, aim: 0.55, retreatHp: 0.35, atkMul: 0.85 },
+  normal: { aiInterval: 420, aggro: 0.45, aim: 0.78, retreatHp: 0.28, atkMul: 1.0 },
+  hard: { aiInterval: 220, aggro: 0.8, aim: 0.95, retreatHp: 0.2, atkMul: 1.15 }
+};
+
+/* ---------------------------------------------------------------
+   5. 유닛 팩토리
+--------------------------------------------------------------- */
+function createChampion(champCfg, team, position, isPlayer) {
+  const b = champCfg.base;
+  const f = FOUNTAIN[team];
+  const u = {
+    type: 'champion', id: uid(), team, position, champion: champCfg, isPlayer: !!isPlayer,
+    x: f.x + rand(-40, 40), y: f.y + rand(-40, 40),
+    hp: b.hp, maxHp: b.hp, mp: b.mp, maxMp: b.mp,
+    ad: b.ad, ap: b.ap, armor: b.armor, speed: b.speed, range: b.range,
+    hpRegen: b.hpRegen, mpRegen: b.mpRegen,
+    level: 1, xp: 0, xpNext: 260, gold: 500,
+    cds: { q: 0, w: 0, e: 0, r: 0, heal: 0, exhaust: 0 },
+    shield: 0, shieldExpire: 0,
+    buffs: [], effects: {},
+    alive: true, respawnAt: 0,
+    moveTarget: null, attackTarget: null, aiTarget: null,
+    lastAttack: -9999, atkInterval: 1.0,
+    facingX: (team === 'blue' ? 1 : -1), facingY: -1,
+    laneIndex: 0, jungleIndex: 0, roamTimer: rand(20000, 40000), roamMode: false, roamUntil: 0,
+    boughtItems: [], nextAiThink: 0, kills: 0, deaths: 0
+  };
+  return u;
+}
+
+function createMinion(team, lane, wave) {
+  const path = pathFor(team, lane);
+  return {
+    type: 'minion', id: uid(), team, lane, x: path[0].x + rand(-15, 15), y: path[0].y + rand(-15, 15),
+    hp: 320 + wave * 12, maxHp: 320 + wave * 12, ad: 24 + wave, armor: 8, speed: 110, range: 45,
+    waypointIndex: 0, path, target: null, lastAttack: -9999, atkInterval: 1.0
+  };
+}
+
+function createTower(def) {
+  return {
+    type: 'tower', id: uid(), team: def.team, lane: def.lane, x: def.x, y: def.y,
+    hp: 2800, maxHp: 2800, ad: 145, armor: 30, range: 620, lastAttack: -9999, atkInterval: 0.85, alive: true
+  };
+}
+
+function createNexus(team) {
+  const f = FOUNTAIN[team];
+  return { type: 'nexus', id: uid(), team, x: f.x, y: f.y, hp: 5000, maxHp: 5000, alive: true };
+}
+
+function createJungleCamp(def) {
+  return {
+    type: 'jungle', id: uid(), name: def.name, x: def.x, y: def.y,
+    hp: 1000, maxHp: 1000, ad: 45, armor: 10, alive: true, respawnAt: 0, range: 40
+  };
+}
+
+/* ---------------------------------------------------------------
+   6. 초기화 / 드래프트
+--------------------------------------------------------------- */
+function buildTeams() {
+  G.units = [];
+  const bluePositions = [...POSITIONS];
+  const redPositions = [...POSITIONS];
+
+  // 플레이어 배치
+  const playerChamp = CHAMP_BY_ID[G.playerChampionId];
+  const playerUnit = createChampion(playerChamp, 'blue', G.playerPosition, true);
+  G.units.push(playerUnit);
+  G.player = playerUnit;
+  const idx = bluePositions.indexOf(G.playerPosition);
+  if (idx >= 0) bluePositions.splice(idx, 1);
+
+  // 나머지 블루팀 AI
+  bluePositions.forEach(pos => {
+    const champ = pick(CHAMPIONS);
+    G.units.push(createChampion(champ, 'blue', pos, false));
+  });
+
+  // 레드팀 전원 AI
+  redPositions.forEach(pos => {
+    const champ = pick(CHAMPIONS);
+    G.units.push(createChampion(champ, 'red', pos, false));
+  });
+
+  // 라인 배치 좌표 살짝 분산
+  G.units.forEach(u => {
+    const lane = POS_LANE[u.position];
+    if (lane) {
+      const path = pathFor(u.team, lane);
+      u.x = path[0].x + rand(-30, 30);
+      u.y = path[0].y + rand(-30, 30);
+    }
+  });
+}
+
+function buildMap() {
+  G.towers = TOWER_DEFS.map(createTower);
+  G.nexuses = [createNexus('blue'), createNexus('red')];
+  G.jungleCamps = JUNGLE_CAMP_DEFS.map(createJungleCamp);
+  G.minions = [];
+  G.projectiles = [];
+  G.particles = [];
+  G.killFeed = [];
+  G.waveTimer = 8000; // 첫 웨이브까지 8초
+}
+
+/* ---------------------------------------------------------------
+   7. 전투 시스템
+--------------------------------------------------------------- */
+function isAlive(u) { return u && (u.alive !== false) && u.hp > 0; }
+
+function enemiesOf(team) { return team === 'blue' ? 'red' : 'blue'; }
+
+function allUnitsList() {
+  // 공격 가능한 모든 개체 (챔피언+미니언+타워+정글몹)
+  return [...G.units, ...G.minions, ...G.towers.filter(t => t.alive), ...G.jungleCamps.filter(j => j.alive)];
+}
+
+function findNearest(fromX, fromY, list, filterFn, maxRange) {
+  let best = null, bestD = maxRange || Infinity;
+  for (const u of list) {
+    if (!filterFn(u)) continue;
+    const d = dist2(fromX, fromY, u.x, u.y);
+    if (d < bestD) { bestD = d; best = u; }
+  }
+  return best;
+}
+
+function pushKillFeed(text) {
+  G.killFeed.unshift({ text, t: G.time });
+  if (G.killFeed.length > 6) G.killFeed.pop();
+}
+
+function spawnFloatText(x, y, text, color) {
+  G.particles.push({ kind: 'text', x, y, text, color, t: G.time, life: 900 });
+}
+function spawnRing(x, y, radius, color, life) {
+  G.particles.push({ kind: 'ring', x, y, radius, color, t: G.time, life: life || 400 });
+}
+
+function hasExhaustPenalty(source) {
+  const ex = source.effects && source.effects.exhaust;
+  return ex && ex.expire > G.time;
+}
+
+function applyDamage(target, rawAmount, dmgType, source) {
+  if (!isAlive(target) && target.type !== 'nexus') return;
+  let amount = rawAmount;
+  if (source && hasExhaustPenalty(source)) amount *= 0.6;
+
+  // 보호막 우선 흡수 (챔피언만)
+  if (target.shield && target.shield > 0) {
+    const absorb = Math.min(target.shield, amount);
+    target.shield -= absorb;
+    amount -= absorb;
+    if (amount <= 0) { spawnFloatText(target.x, target.y - 40, '보호막', '#9fd6ff'); return; }
+  }
+
+  const armor = target.armor || 0;
+  const mult = 100 / (100 + Math.max(0, armor));
+  const finalDmg = Math.max(1, amount * mult);
+  target.hp -= finalDmg;
+
+  const color = dmgType === 'ap' ? '#c98bff' : '#ffd27a';
+  spawnFloatText(target.x + rand(-8, 8), target.y - 30, Math.round(finalDmg).toString(), color);
+
+  if (target.hp <= 0) handleDeath(target, source);
+}
+
+function xpForKill(killed) {
+  if (killed.type === 'minion') return 55;
+  if (killed.type === 'jungle') return 90;
+  if (killed.type === 'champion') return 250;
+  return 0;
+}
+function goldForKill(killed) {
+  if (killed.type === 'minion') return randInt(18, 26);
+  if (killed.type === 'jungle') return 90;
+  if (killed.type === 'champion') return 300;
+  if (killed.type === 'tower') return 150;
+  return 0;
+}
+
+function grantXpGold(team, x, y, killedUnit, killer) {
+  const xp = xpForKill(killedUnit);
+  const gold = goldForKill(killedUnit);
+  // 근처 아군 챔피언에게 xp 분배, 처치자에게 골드
+  G.units.forEach(u => {
+    if (u.team !== team || !isAlive(u)) return;
+    const d = dist2(u.x, u.y, x, y);
+    if (d < 900) addXp(u, xp);
+  });
+  if (killer && killer.type === 'champion') {
+    killer.gold += gold;
+    if (killedUnit.type === 'champion') killer.kills++;
+  } else {
+    // 타워/미니언이 처치한 경우, 최근접 아군 챔피언에게 골드 소량
+    const near = findNearest(x, y, G.units.filter(u => u.team === team), u => isAlive(u), 900);
+    if (near) near.gold += Math.round(gold * 0.5);
+  }
+}
+
+function addXp(u, xp) {
+  u.xp += xp;
+  while (u.xp >= u.xpNext && u.level < 18) {
+    u.xp -= u.xpNext;
+    u.level++;
+    u.xpNext = Math.round(u.xpNext * 1.12 + 40);
+    const g = u.champion.growth;
+    u.maxHp += g.hp; u.hp += g.hp;
+    u.maxMp += g.mp || 0; u.mp += g.mp || 0;
+    u.ad += g.ad || 0; u.ap += g.ap || 0; u.armor += g.armor || 0;
+    if (u === G.player) spawnFloatText(u.x, u.y - 60, '레벨 업!', '#f0e6d2');
+  }
+}
+
+function respawnTime(u) { return 6 + u.level * 1.6; }
+
+function handleDeath(target, source) {
+  if (target.type === 'champion') {
+    if (!target.alive) return;
+    target.alive = false;
+    target.hp = 0;
+    target.shield = 0;
+    target.deaths++;
+    target.respawnAt = G.time + respawnTime(target) * 1000;
+    target.moveTarget = null; target.attackTarget = null; target.aiTarget = null;
+    grantXpGold(source ? source.team : enemiesOf(target.team), target.x, target.y, target, source);
+    const srcName = source && source.champion ? source.champion.name : (source ? '포탑' : '알 수 없음');
+    pushKillFeed(`<b>${srcName}</b> 이(가) <b>${target.champion.name}</b> 처치`);
+    spawnRing(target.x, target.y, 60, '#ff4d5e', 700);
+    if (target === G.player) showToast('처치당했습니다! ' + Math.ceil(respawnTime(target)) + '초 후 부활');
+  } else if (target.type === 'minion') {
+    grantXpGold(source ? source.team : enemiesOf(target.team), target.x, target.y, target, source);
+    G.minions = G.minions.filter(m => m !== target);
+  } else if (target.type === 'jungle') {
+    if (source && source.type === 'champion') {
+      source.gold += goldForKill(target);
+      addXp(source, xpForKill(target));
+      source.buffs.push({ stat: 'ad', amount: 15, expire: G.time + 60000 });
+      source.buffs.push({ stat: 'ap', amount: 15, expire: G.time + 60000 });
+      if (source === G.player) showToast('정글 몬스터 처치! 60초간 공격력/주문력 증가');
+    }
+    target.alive = false;
+    target.respawnAt = G.time + 45000;
+  } else if (target.type === 'tower') {
+    target.alive = false;
+    grantXpGold(source ? source.team : enemiesOf(target.team), target.x, target.y, target, source);
+    pushKillFeed(`${target.team === 'blue' ? '블루' : '레드'}팀 포탑 파괴됨`);
+  } else if (target.type === 'nexus') {
+    target.alive = false;
+    endGame(enemiesOf(target.team));
+  }
+}
+
+/* ---------------------------------------------------------------
+   8. 스킬(능력) 시스템
+--------------------------------------------------------------- */
+function aimDir(unit) {
+  if (unit.isPlayer) {
+    return normalize(G.mouseWorld.x - unit.x, G.mouseWorld.y - unit.y);
+  }
+  if (unit.aiTarget && isAlive(unit.aiTarget)) {
+    return normalize(unit.aiTarget.x - unit.x, unit.aiTarget.y - unit.y);
+  }
+  return normalize(unit.facingX, unit.facingY);
+}
+
+function targetPoint(unit) {
+  if (unit.isPlayer) return { x: G.mouseWorld.x, y: G.mouseWorld.y };
+  if (unit.aiTarget && isAlive(unit.aiTarget)) {
+    // AI 조준 오차 적용
+    const cfg = DIFF_CFG[G.difficulty];
+    const off = (1 - cfg.aim) * 220;
+    return { x: unit.aiTarget.x + rand(-off, off), y: unit.aiTarget.y + rand(-off, off) };
+  }
+  return { x: unit.x + unit.facingX * 300, y: unit.y + unit.facingY * 300 };
+}
+
+function scaledDamage(unit, ability) {
+  const base = ability.damage;
+  const scale = ability.dmgType === 'ap' ? unit.ap * 0.55 : unit.ad * 0.35;
+  return base + scale + unit.level * 4;
+}
+
+function livingEnemiesNear(team, x, y, radius, includeStructures) {
+  const list = [
+    ...G.units.filter(u => u.team !== team && isAlive(u)),
+    ...G.minions.filter(m => m.team !== team)
+  ];
+  if (includeStructures) list.push(...G.towers.filter(t => t.team !== team && t.alive));
+  return list.filter(u => dist2(u.x, u.y, x, y) <= radius);
+}
+
+function livingAlliesNear(team, x, y, radius) {
+  return G.units.filter(u => u.team === team && isAlive(u) && dist2(u.x, u.y, x, y) <= radius);
+}
+
+function clampWorld(u) {
+  u.x = clamp(u.x, 40, WORLD - 40);
+  u.y = clamp(u.y, 40, WORLD - 40);
+}
+
+const ABILITY_HANDLERS = {
+  dash(unit, ab) {
+    const d = aimDir(unit);
+    const dist_ = ab.range;
+    const startX = unit.x, startY = unit.y;
+    unit.x += d.x * dist_; unit.y += d.y * dist_;
+    clampWorld(unit);
+    const targets = livingEnemiesNear(unit.team, unit.x, unit.y, ab.hitRadius || 100);
+    targets.forEach(t => {
+      applyDamage(t, scaledDamage(unit, ab), ab.dmgType, unit);
+      if (ab.stunOnHit) applyCC(t, 'stun', ab.ccDuration || 1);
+    });
+    spawnRing(unit.x, unit.y, ab.hitRadius || 100, unit.champion ? unit.champion.color : '#fff', 350);
+  },
+  shield_self(unit, ab) {
+    unit.shield = (unit.shield || 0) + ab.amount;
+    unit.shieldExpire = G.time + ab.duration * 1000;
+    spawnRing(unit.x, unit.y, 55, '#9fd6ff', 500);
+  },
+  aoe_self(unit, ab) {
+    const targets = livingEnemiesNear(unit.team, unit.x, unit.y, ab.radius);
+    targets.forEach(t => {
+      applyDamage(t, scaledDamage(unit, ab), ab.dmgType, unit);
+      if (ab.slow) applyCC(t, 'slow', ab.slowDuration, ab.slow);
+    });
+    spawnRing(unit.x, unit.y, ab.radius, unit.champion.color, 450);
+  },
+  projectile(unit, ab) {
+    const d = aimDir(unit);
+    G.projectiles.push({
+      id: uid(), x: unit.x, y: unit.y, vx: d.x * ab.speed, vy: d.y * ab.speed,
+      team: unit.team, owner: unit, damage: scaledDamage(unit, ab), dmgType: ab.dmgType,
+      hitRadius: ab.hitRadius, maxRange: ab.range, traveled: 0, pierce: !!ab.pierce,
+      hitSet: new Set(), color: unit.champion.color, cc: null
+    });
+  },
+  projectile_cc(unit, ab) {
+    const d = aimDir(unit);
+    G.projectiles.push({
+      id: uid(), x: unit.x, y: unit.y, vx: d.x * ab.speed, vy: d.y * ab.speed,
+      team: unit.team, owner: unit, damage: scaledDamage(unit, ab), dmgType: ab.dmgType,
+      hitRadius: ab.hitRadius, maxRange: ab.range, traveled: 0, pierce: false,
+      hitSet: new Set(), color: unit.champion.color, cc: ab.cc, ccDuration: ab.ccDuration
+    });
+  },
+  blink(unit, ab) {
+    const d = aimDir(unit);
+    unit.x += d.x * ab.range; unit.y += d.y * ab.range;
+    clampWorld(unit);
+    spawnRing(unit.x, unit.y, 40, '#b06bff', 350);
+  },
+  buff_self(unit, ab) {
+    unit.buffs.push({ stat: 'speed', amount: ab.speedAmount, expire: G.time + ab.duration * 1000 });
+    if (ab.evasion) { unit.evasion = ab.evasion; unit.evasionExpire = G.time + ab.duration * 1000; }
+    spawnRing(unit.x, unit.y, 45, unit.champion.color, 400);
+  },
+  shield_ally(unit, ab) {
+    unit.shield = (unit.shield || 0) + ab.amount;
+    unit.shieldExpire = G.time + ab.duration * 1000;
+    const ally = findNearest(unit.x, unit.y, G.units.filter(u => u !== unit), u => u.team === unit.team && isAlive(u), ab.range);
+    if (ally) { ally.shield = (ally.shield || 0) + ab.amount; ally.shieldExpire = G.time + ab.duration * 1000; spawnRing(ally.x, ally.y, 50, '#9fd6ff', 500); }
+    spawnRing(unit.x, unit.y, 50, '#9fd6ff', 500);
+  },
+  aoe_point(unit, ab) {
+    const p = targetPoint(unit);
+    const d = dist2(unit.x, unit.y, p.x, p.y);
+    if (d > ab.range) { const n = normalize(p.x - unit.x, p.y - unit.y); p.x = unit.x + n.x * ab.range; p.y = unit.y + n.y * ab.range; }
+    const targets = livingEnemiesNear(unit.team, p.x, p.y, ab.radius);
+    targets.forEach(t => {
+      applyDamage(t, scaledDamage(unit, ab), ab.dmgType, unit);
+      if (ab.slow) applyCC(t, 'slow', ab.slowDuration, ab.slow);
+    });
+    spawnRing(p.x, p.y, ab.radius, unit.champion.color, 550);
+  },
+  stun_self_area(unit, ab) {
+    const targets = livingEnemiesNear(unit.team, unit.x, unit.y, ab.radius);
+    targets.forEach(t => { applyDamage(t, scaledDamage(unit, ab), ab.dmgType, unit); applyCC(t, 'stun', ab.ccDuration); });
+    spawnRing(unit.x, unit.y, ab.radius, '#f0e6d2', 400);
+  },
+  heal_allies_shield(unit, ab) {
+    const allies = livingAlliesNear(unit.team, unit.x, unit.y, ab.radius);
+    allies.forEach(a => {
+      a.hp = Math.min(a.maxHp, a.hp + ab.healAmount);
+      a.shield = (a.shield || 0) + ab.shieldAmount;
+      a.shieldExpire = G.time + ab.duration * 1000;
+    });
+    spawnRing(unit.x, unit.y, ab.radius, '#c8aa6e', 700);
+  },
+  execute(unit, ab) {
+    const t = findNearest(unit.x, unit.y, G.units, u => u.team !== unit.team && isAlive(u), ab.range);
+    if (!t) return;
+    const mult = (t.hp / t.maxHp) < ab.executeThreshold ? ab.executeMult : 1;
+    applyDamage(t, scaledDamage(unit, ab) * mult, ab.dmgType, unit);
+    spawnRing(t.x, t.y, 55, '#2ee6a6', 350);
+  }
+};
+
+function applyCC(target, kind, duration, power) {
+  target.effects = target.effects || {};
+  target.effects[kind] = { expire: G.time + duration * 1000, power: power || 0 };
+  if (target === G.player) showToast(kind === 'stun' ? '기절!' : kind === 'root' ? '속박!' : '둔화!');
+}
+
+function abilityReady(unit, key) {
+  const ab = unit.champion.abilities[key];
+  return G.time >= (unit.cds[key] || 0) && unit.mp >= ab.cost;
+}
+
+function castAbility(unit, key) {
+  if (!isAlive(unit)) return false;
+  if (unit.effects && unit.effects.stun && unit.effects.stun.expire > G.time) return false;
+  const ab = unit.champion.abilities[key];
+  if (!ab) return false;
+  if (!abilityReady(unit, key)) return false;
+  unit.mp -= ab.cost;
+  unit.cds[key] = G.time + ab.cd * 1000;
+  const handler = ABILITY_HANDLERS[ab.type];
+  if (handler) handler(unit, ab);
+  return true;
+}
+
+function castHeal(unit) {
+  if (!isAlive(unit)) return false;
+  if (G.time < (unit.cds.heal || 0)) return false;
+  unit.cds.heal = G.time + 90000;
+  const amount = 300 + unit.level * 18;
+  unit.hp = Math.min(unit.maxHp, unit.hp + amount);
+  unit.buffs.push({ stat: 'speed', amount: 75, expire: G.time + 2000 });
+  const ally = findNearest(unit.x, unit.y, G.units.filter(u => u !== unit), u => u.team === unit.team && isAlive(u), 400);
+  if (ally) { ally.hp = Math.min(ally.maxHp, ally.hp + amount); ally.buffs.push({ stat: 'speed', amount: 75, expire: G.time + 2000 }); }
+  spawnRing(unit.x, unit.y, 60, '#4fdc7a', 500);
+  if (unit === G.player) showToast('회복 시전!');
+  return true;
+}
+
+function castExhaust(unit) {
+  if (!isAlive(unit)) return false;
+  if (G.time < (unit.cds.exhaust || 0)) return false;
+  let target;
+  if (unit.isPlayer) {
+    target = findNearest(G.mouseWorld.x, G.mouseWorld.y, G.units, u => u.team !== unit.team && isAlive(u), 700);
+  } else {
+    target = (unit.aiTarget && isAlive(unit.aiTarget) && unit.aiTarget.team !== unit.team) ? unit.aiTarget : null;
+  }
+  if (!target) { if (unit === G.player) showToast('탈진: 대상이 없습니다'); return false; }
+  unit.cds.exhaust = G.time + 90000;
+  target.effects = target.effects || {};
+  target.effects.exhaust = { expire: G.time + 2.5 * 1000 };
+  target.effects.slow = { expire: G.time + 2.5 * 1000, power: 45 };
+  spawnRing(target.x, target.y, 50, '#ff4d5e', 600);
+  if (unit === G.player) showToast('탈진 시전!');
+  return true;
+}
+
+/* ---------------------------------------------------------------
+   9. 기본 공격 / 이동
+--------------------------------------------------------------- */
+function effectiveSpeed(u) {
+  let s = u.speed;
+  (u.buffs || []).forEach(b => { if (b.stat === 'speed' && b.expire > G.time) s += b.amount; });
+  if (u.effects && u.effects.slow && u.effects.slow.expire > G.time) s *= (1 - u.effects.slow.power / 100);
+  if (u.effects && u.effects.root && u.effects.root.expire > G.time) s = 0;
+  if (u.effects && u.effects.stun && u.effects.stun.expire > G.time) s = 0;
+  return Math.max(0, s);
+}
+
+function effectiveAd(u) {
+  let ad = u.ad;
+  (u.buffs || []).forEach(b => { if (b.stat === 'ad' && b.expire > G.time) ad += b.amount; });
+  return ad;
+}
+function effectiveAp(u) {
+  let ap = u.ap;
+  (u.buffs || []).forEach(b => { if (b.stat === 'ap' && b.expire > G.time) ap += b.amount; });
+  return ap;
+}
+
+function moveUnitToward(u, tx, ty, dt) {
+  const d = normalize(tx - u.x, ty - u.y);
+  const sp = effectiveSpeed(u);
+  if (sp <= 0) return;
+  const step = sp * dt;
+  const remain = dist2(u.x, u.y, tx, ty);
+  const m = Math.min(step, remain);
+  u.x += d.x * m; u.y += d.y * m;
+  u.facingX = d.x; u.facingY = d.y;
+  clampWorld(u);
+}
+
+function basicAttack(attacker, target, dt) {
+  if (!target || !isAlive2(target)) return;
+  const range = (attacker.range || 55) + 25;
+  const d = dist2(attacker.x, attacker.y, target.x, target.y);
+  if (d > range) {
+    moveUnitToward(attacker, target.x, target.y, dt);
+    return;
+  }
+  if (G.time - attacker.lastAttack < (attacker.atkInterval || 1) * 1000) return;
+  attacker.lastAttack = G.time;
+  // 회피 판정
+  if (target.evasion && target.evasionExpire > G.time && Math.random() < target.evasion) {
+    spawnFloatText(target.x, target.y - 30, '회피', '#2ee6a6');
+    return;
+  }
+  const ad = attacker.type === 'champion' ? effectiveAd(attacker) : attacker.ad;
+  applyDamage(target, ad, 'ad', attacker);
+}
+function isAlive2(t) {
+  if (t.type === 'champion') return isAlive(t);
+  if (t.type === 'tower' || t.type === 'jungle') return t.alive;
+  return t.hp > 0;
+}
+
+/* ---------------------------------------------------------------
+   10. 챔피언 업데이트 (플레이어 + AI 공용 로직 진입점)
+--------------------------------------------------------------- */
+function updateChampion(u, dt) {
+  if (!u.alive) {
+    if (G.time >= u.respawnAt) {
+      u.alive = true;
+      u.hp = u.maxHp; u.mp = u.maxMp;
+      const f = FOUNTAIN[u.team];
+      u.x = f.x; u.y = f.y;
+      u.shield = 0;
+      if (u === G.player) showToast('부활했습니다!');
+    }
+    return;
+  }
+
+  // 리젠
+  u.hp = Math.min(u.maxHp, u.hp + u.hpRegen * dt);
+  u.mp = Math.min(u.maxMp, u.mp + u.mpRegen * dt);
+  // 기지 근처 회복 부스트
+  const f = FOUNTAIN[u.team];
+  if (dist2(u.x, u.y, f.x, f.y) < 260) {
+    u.hp = Math.min(u.maxHp, u.hp + u.maxHp * 0.05 * dt);
+    u.mp = Math.min(u.maxMp, u.mp + u.maxMp * 0.06 * dt);
+  }
+  // 만료 정리
+  if (u.shieldExpire && u.shieldExpire <= G.time) u.shield = 0;
+  u.buffs = (u.buffs || []).filter(b => b.expire > G.time);
+  if (u.evasionExpire && u.evasionExpire <= G.time) u.evasion = 0;
+
+  const stunned = u.effects && u.effects.stun && u.effects.stun.expire > G.time;
+  const rooted = u.effects && u.effects.root && u.effects.root.expire > G.time;
+
+  if (u.isPlayer) {
+    updatePlayerControl(u, dt, stunned, rooted);
+  } else {
+    updateAiChampion(u, dt, stunned, rooted);
+  }
+}
+
+/* ---------------------------------------------------------------
+   11. 플레이어 입력 처리
+--------------------------------------------------------------- */
+function updatePlayerControl(u, dt, stunned, rooted) {
+  if (!stunned && !rooted) {
+    // WASD 이동 (우선)
+    let mx = 0, my = 0;
+    if (G.keys['w']) my -= 1;
+    if (G.keys['s']) my += 1;
+    if (G.keys['a']) mx -= 1;
+    if (G.keys['d']) mx += 1;
+    if (mx || my) {
+      const n = normalize(mx, my);
+      const sp = effectiveSpeed(u);
+      u.x += n.x * sp * dt; u.y += n.y * sp * dt;
+      u.facingX = n.x; u.facingY = n.y;
+      clampWorld(u);
+      u.moveTarget = null;
+      u.attackTarget = null;
+    } else if (u.moveTarget) {
+      const d = dist2(u.x, u.y, u.moveTarget.x, u.moveTarget.y);
+      if (d < 12) u.moveTarget = null;
+      else moveUnitToward(u, u.moveTarget.x, u.moveTarget.y, dt);
+    }
+  } else {
+    u.moveTarget = null;
+  }
+
+  if (!stunned && u.attackTarget) {
+    if (!isAlive2(u.attackTarget)) { u.attackTarget = null; }
+    else basicAttack(u, u.attackTarget, dt);
+  }
+}
+
+/* ---------------------------------------------------------------
+   12. 미니언 / 타워 / 정글캠프 업데이트
+--------------------------------------------------------------- */
+function updateMinion(m, dt) {
+  const enemyTeam = enemiesOf(m.team);
+  if (!m.target || !isAlive2(m.target) || dist2(m.x, m.y, m.target.x, m.target.y) > 480) {
+    const candidates = [
+      ...G.units.filter(u => u.team === enemyTeam && isAlive(u)),
+      ...G.minions.filter(mm => mm.team === enemyTeam),
+      ...G.towers.filter(t => t.team === enemyTeam && t.alive)
+    ];
+    m.target = findNearest(m.x, m.y, candidates, () => true, 420);
+  }
+  if (m.target) {
+    const range = 55;
+    const d = dist2(m.x, m.y, m.target.x, m.target.y);
+    if (d <= range) {
+      if (G.time - m.lastAttack >= m.atkInterval * 1000) {
+        m.lastAttack = G.time;
+        applyDamage(m.target, m.ad, 'ad', m);
+      }
+    } else {
+      moveUnitToward(m, m.target.x, m.target.y, dt);
+    }
+    return;
+  }
+  // 웨이포인트 이동
+  const wp = m.path[m.waypointIndex];
+  if (!wp) return;
+  if (dist2(m.x, m.y, wp.x, wp.y) < 30) m.waypointIndex = Math.min(m.waypointIndex + 1, m.path.length - 1);
+  else moveUnitToward(m, wp.x, wp.y, dt);
+}
+
+function updateTower(t, dt) {
+  if (!t.alive) return;
+  const enemyTeam = enemiesOf(t.team);
+  const candidates = [
+    ...G.minions.filter(m => m.team === enemyTeam),
+    ...G.units.filter(u => u.team === enemyTeam && isAlive(u))
+  ];
+  const target = findNearest(t.x, t.y, candidates, () => true, t.range);
+  if (!target) return;
+  if (G.time - t.lastAttack >= t.atkInterval * 1000) {
+    t.lastAttack = G.time;
+    applyDamage(target, t.ad, 'ad', t);
+  }
+}
+
+function updateJungleCamp(j, dt) {
+  if (!j.alive) {
+    if (G.time >= j.respawnAt) { j.alive = true; j.hp = j.maxHp; }
+    return;
+  }
+  const attacker = findNearest(j.x, j.y, G.units, u => isAlive(u), 60);
+  if (attacker && G.time - (j.lastAttack || 0) > 1000) {
+    j.lastAttack = G.time;
+    applyDamage(attacker, j.ad, 'ad', j);
+  }
+}
+
+function spawnWave() {
+  ['top', 'mid', 'bot'].forEach(lane => {
+    for (let i = 0; i < 3; i++) {
+      G.minions.push(createMinion('blue', lane, G.time / 1000));
+      G.minions.push(createMinion('red', lane, G.time / 1000));
+    }
+  });
+}
+
+/* ---------------------------------------------------------------
+   13. 투사체 업데이트
+--------------------------------------------------------------- */
+function updateProjectile(p, dt) {
+  const step = Math.hypot(p.vx, p.vy) * dt;
+  p.x += p.vx * dt; p.y += p.vy * dt; p.traveled += step;
+  if (p.traveled >= p.maxRange || p.x < 0 || p.x > WORLD || p.y < 0 || p.y > WORLD) { p.dead = true; return; }
+  const enemyTeam = enemiesOf(p.team);
+  const candidates = [
+    ...G.units.filter(u => u.team === enemyTeam && isAlive(u)),
+    ...G.minions.filter(m => m.team === enemyTeam)
+  ];
+  for (const c of candidates) {
+    if (p.hitSet.has(c.id)) continue;
+    if (dist2(p.x, p.y, c.x, c.y) <= (p.hitRadius || 26)) {
+      applyDamage(c, p.damage, p.dmgType, p.owner);
+      if (p.cc) applyCC(c, p.cc, p.ccDuration);
+      p.hitSet.add(c.id);
+      if (!p.pierce) { p.dead = true; return; }
+    }
+  }
+}
+
+/* ---------------------------------------------------------------
+   14. AI 챔피언 로직
+--------------------------------------------------------------- */
+function updateAiChampion(u, dt, stunned, rooted) {
+  const cfg = DIFF_CFG[G.difficulty];
+  const enemyTeam = enemiesOf(u.team);
+
+  if (G.time >= u.nextAiThink) {
+    u.nextAiThink = G.time + cfg.aiInterval;
+    aiThink(u, cfg, enemyTeam);
+  }
+
+  if (stunned) return;
+
+  if (u.aiTarget && isAlive2(u.aiTarget)) {
+    if (!rooted) basicAttack(u, u.aiTarget, dt);
+    else if (dist2(u.x, u.y, u.aiTarget.x, u.aiTarget.y) <= (u.range || 60) + 25) basicAttack(u, u.aiTarget, dt);
+  } else if (u.moveTarget && !rooted) {
+    const d = dist2(u.x, u.y, u.moveTarget.x, u.moveTarget.y);
+    if (d < 20) u.moveTarget = null;
+    else moveUnitToward(u, u.moveTarget.x, u.moveTarget.y, dt);
+  }
+}
+
+function aiThink(u, cfg, enemyTeam) {
+  // 후퇴 판단
+  if (u.hp / u.maxHp < cfg.retreatHp) {
+    if (Math.random() < 0.55) castHeal(u);
+    const f = FOUNTAIN[u.team];
+    u.aiTarget = null;
+    u.moveTarget = { x: f.x + rand(-60, 60), y: f.y + rand(-60, 60) };
+    return;
+  }
+
+  const visionRange = 620;
+  const enemyChamp = findNearest(u.x, u.y, G.units, e => e.team === enemyTeam && isAlive(e), visionRange);
+
+  if (enemyChamp) {
+    u.aiTarget = enemyChamp;
+    maybeUseAbilities(u, cfg, enemyChamp);
+    return;
+  }
+
+  if (u.position === 'jungle') { handleJungleAi(u); return; }
+
+  const enemyStuff = [
+    ...G.minions.filter(m => m.team === enemyTeam),
+    ...G.towers.filter(t => t.team === enemyTeam && t.alive)
+  ];
+  const nearEnemyUnit = findNearest(u.x, u.y, enemyStuff, () => true, 480);
+  if (nearEnemyUnit) {
+    u.aiTarget = nearEnemyUnit;
+  } else {
+    u.aiTarget = null;
+    const lane = POS_LANE[u.position] || 'mid';
+    const path = pathFor(u.team, lane);
+    const wp = path[Math.min(u.laneIndex, path.length - 1)];
+    if (dist2(u.x, u.y, wp.x, wp.y) < 70) u.laneIndex = Math.min(u.laneIndex + 1, path.length - 1);
+    u.moveTarget = path[Math.min(u.laneIndex, path.length - 1)];
+  }
+
+  if (u.hp / u.maxHp < 0.45 && Math.random() < 0.3) castHeal(u);
+}
+
+function handleJungleAi(u) {
+  if (u.roamMode) {
+    if (G.time > u.roamUntil) u.roamMode = false;
+    return;
+  }
+  if (G.time > u.roamTimer) {
+    u.roamMode = true;
+    u.roamUntil = G.time + rand(12000, 18000);
+    const lane = pick(['top', 'mid', 'bot']);
+    const path = pathFor(u.team, lane);
+    u.moveTarget = path[1];
+    u.aiTarget = null;
+    u.roamTimer = G.time + rand(28000, 42000);
+    return;
+  }
+  const camp = G.jungleCamps.find(c => c.alive);
+  if (camp) {
+    const d = dist2(u.x, u.y, camp.x, camp.y);
+    if (d < 70) { u.aiTarget = camp; u.moveTarget = null; }
+    else { u.moveTarget = { x: camp.x, y: camp.y }; u.aiTarget = null; }
+  } else {
+    u.moveTarget = { x: WORLD / 2 + rand(-200, 200), y: WORLD / 2 + rand(-200, 200) };
+  }
+  if (u.hp / u.maxHp < 0.45 && Math.random() < 0.3) castHeal(u);
+}
+
+function maybeUseAbilities(u, cfg, target) {
+  ['q', 'w', 'e', 'r'].forEach(k => {
+    if (Math.random() < cfg.aggro && abilityReady(u, k)) castAbility(u, k);
+  });
+  if (Math.random() < cfg.aggro * 0.6 && G.time >= (u.cds.exhaust || 0)) castExhaust(u);
+}
+
+/* AI 상점: 배경에서 자동으로 아이템 구매 (플레이어 제외) */
+function aiAutoShop(u) {
+  if (u.isPlayer || !isAlive(u)) return;
+  const affordable = ITEMS.filter(it => !u.boughtItems.includes(it.id) && u.gold >= it.cost);
+  if (affordable.length === 0) return;
+  const it = pick(affordable);
+  it.apply(u);
+  u.gold -= it.cost;
+  u.boughtItems.push(it.id);
+}
+
+/* ---------------------------------------------------------------
+   15. 메인 업데이트 루프
+--------------------------------------------------------------- */
+function update(dt) {
+  G.time += dt * 1000;
+  G.waveTimer -= dt * 1000;
+  if (G.waveTimer <= 0) { spawnWave(); G.waveTimer = 25000; }
+
+  G.units.forEach(u => updateChampion(u, dt));
+  G.minions.forEach(m => updateMinion(m, dt));
+  G.towers.forEach(t => updateTower(t, dt));
+  G.jungleCamps.forEach(j => updateJungleCamp(j, dt));
+  G.projectiles.forEach(p => updateProjectile(p, dt));
+  G.projectiles = G.projectiles.filter(p => !p.dead);
+  G.particles = G.particles.filter(p => G.time - p.t < p.life);
+
+  G.shopTimer = (G.shopTimer || 0) - dt * 1000;
+  if (G.shopTimer <= 0) {
+    G.shopTimer = 4000;
+    G.units.forEach(u => { if (!u.isPlayer && Math.random() < 0.35) aiAutoShop(u); });
+  }
+
+  updateCamera();
+  syncHud();
+}
+
+function updateCamera() {
+  const target = G.player;
+  const halfW = G.vw / 2, halfH = G.vh / 2;
+  G.camera.x = clamp(target.x, halfW, WORLD - halfW);
+  G.camera.y = clamp(target.y, halfH, WORLD - halfH);
+}
+
+/* ---------------------------------------------------------------
+   16. 렌더링
+--------------------------------------------------------------- */
+function w2s(x, y) { return { x: x - G.camera.x + G.vw / 2, y: y - G.camera.y + G.vh / 2 }; }
+
+function render() {
+  const ctx = G.ctx;
+  ctx.clearRect(0, 0, G.vw, G.vh);
+
+  // 배경
+  ctx.fillStyle = '#0e1420';
+  ctx.fillRect(0, 0, G.vw, G.vh);
+
+  drawJungleZones(ctx);
+  drawLanes(ctx);
+  drawBases(ctx);
+  G.jungleCamps.forEach(j => drawJungleCamp(ctx, j));
+  G.towers.forEach(t => drawTower(ctx, t));
+  G.nexuses.forEach(n => drawNexus(ctx, n));
+  G.minions.forEach(m => drawMinion(ctx, m));
+  G.projectiles.forEach(p => drawProjectile(ctx, p));
+  G.units.forEach(u => drawChampion(ctx, u));
+  drawParticles(ctx);
+
+  renderMinimap();
+}
+
+function drawLanes(ctx) {
+  ctx.strokeStyle = 'rgba(120,140,170,.14)';
+  ctx.lineWidth = 90;
+  ctx.lineCap = 'round';
+  Object.values(PATHS).forEach(path => {
+    ctx.beginPath();
+    path.forEach((p, i) => {
+      const s = w2s(p.x, p.y);
+      if (i === 0) ctx.moveTo(s.x, s.y); else ctx.lineTo(s.x, s.y);
+    });
+    ctx.stroke();
+  });
+}
+
+function drawJungleZones(ctx) {
+  ctx.fillStyle = 'rgba(46,230,166,.03)';
+  const tri1 = [{x:260,y:2150},{x:1200,y:1200},{x:260,y:260}];
+  const tri2 = [{x:2150,y:260},{x:1200,y:1200},{x:2150,y:2150}];
+  [tri1, tri2].forEach(tri => {
+    ctx.beginPath();
+    tri.forEach((p, i) => { const s = w2s(p.x, p.y); if (i === 0) ctx.moveTo(s.x, s.y); else ctx.lineTo(s.x, s.y); });
+    ctx.closePath(); ctx.fill();
+  });
+}
+
+function drawBases(ctx) {
+  [['blue', FOUNTAIN.blue], ['red', FOUNTAIN.red]].forEach(([team, f]) => {
+    const s = w2s(f.x, f.y);
+    const grad = ctx.createRadialGradient(s.x, s.y, 10, s.x, s.y, 260);
+    const c = team === 'blue' ? '63,169,255' : '255,77,94';
+    grad.addColorStop(0, `rgba(${c},.22)`);
+    grad.addColorStop(1, `rgba(${c},0)`);
+    ctx.fillStyle = grad;
+    ctx.beginPath(); ctx.arc(s.x, s.y, 260, 0, Math.PI * 2); ctx.fill();
+  });
+}
+
+function drawJungleCamp(ctx, j) {
+  const s = w2s(j.x, j.y);
+  if (s.x < -50 || s.x > G.vw + 50 || s.y < -50 || s.y > G.vh + 50) return;
+  ctx.fillStyle = j.alive ? '#3a4a35' : '#20261f';
+  ctx.beginPath(); ctx.arc(s.x, s.y, 22, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = j.alive ? '#6dbf5a' : '#3a4235'; ctx.lineWidth = 2; ctx.stroke();
+  if (j.alive) drawHpBar(ctx, s.x, s.y - 34, 44, j.hp / j.maxHp, '#6dbf5a');
+}
+
+function drawTower(ctx, t) {
+  if (!t.alive) return;
+  const s = w2s(t.x, t.y);
+  if (s.x < -60 || s.x > G.vw + 60 || s.y < -60 || s.y > G.vh + 60) return;
+  const color = t.team === 'blue' ? '#3fa9ff' : '#ff4d5e';
+  ctx.fillStyle = '#1a2233';
+  ctx.beginPath(); ctx.arc(s.x, s.y, 20, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = color; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(s.x, s.y - 16); ctx.lineTo(s.x + 14, s.y + 10); ctx.lineTo(s.x - 14, s.y + 10);
+  ctx.closePath(); ctx.fill();
+  drawHpBar(ctx, s.x, s.y - 32, 50, t.hp / t.maxHp, color);
+}
+
+function drawNexus(ctx, n) {
+  if (!n.alive) return;
+  const s = w2s(n.x, n.y);
+  const color = n.team === 'blue' ? '#3fa9ff' : '#ff4d5e';
+  ctx.save();
+  ctx.translate(s.x, s.y);
+  ctx.rotate(Math.PI / 4);
+  ctx.fillStyle = color;
+  ctx.fillRect(-16, -16, 32, 32);
+  ctx.restore();
+  ctx.strokeStyle = '#fff8'; ctx.lineWidth = 2;
+  ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(Math.PI / 4); ctx.strokeRect(-16, -16, 32, 32); ctx.restore();
+  drawHpBar(ctx, s.x, s.y - 40, 60, n.hp / n.maxHp, color);
+}
+
+function drawMinion(ctx, m) {
+  const s = w2s(m.x, m.y);
+  if (s.x < -30 || s.x > G.vw + 30 || s.y < -30 || s.y > G.vh + 30) return;
+  const color = m.team === 'blue' ? '#3fa9ff' : '#ff4d5e';
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.arc(s.x, s.y, 8, 0, Math.PI * 2); ctx.fill();
+  drawHpBar(ctx, s.x, s.y - 16, 22, m.hp / m.maxHp, color);
+}
+
+function drawProjectile(ctx, p) {
+  const s = w2s(p.x, p.y);
+  ctx.fillStyle = p.color || '#fff';
+  ctx.shadowColor = p.color; ctx.shadowBlur = 8;
+  ctx.beginPath(); ctx.arc(s.x, s.y, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.shadowBlur = 0;
+}
+
+function drawHpBar(ctx, cx, topY, w, pct, color) {
+  pct = clamp(pct, 0, 1);
+  ctx.fillStyle = 'rgba(0,0,0,.55)';
+  ctx.fillRect(cx - w / 2, topY, w, 5);
+  ctx.fillStyle = color;
+  ctx.fillRect(cx - w / 2, topY, w * pct, 5);
+}
+
+function drawChampion(ctx, u) {
+  const s = w2s(u.x, u.y);
+  if (s.x < -60 || s.x > G.vw + 60 || s.y < -60 || s.y > G.vh + 60) return;
+  const champ = u.champion;
+  const teamColor = u.team === 'blue' ? '#3fa9ff' : '#ff4d5e';
+
+  if (!u.alive) {
+    ctx.globalAlpha = 0.25;
+    ctx.fillStyle = '#555';
+    ctx.beginPath(); ctx.arc(s.x, s.y, 16, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = 1;
+    return;
+  }
+
+  if (u.evasion && u.evasionExpire > G.time) ctx.globalAlpha = 0.55;
+
+  // 몸체
+  ctx.fillStyle = champ.color;
+  ctx.beginPath(); ctx.arc(s.x, s.y, 17, 0, Math.PI * 2); ctx.fill();
+  ctx.lineWidth = 3; ctx.strokeStyle = teamColor; ctx.stroke();
+  ctx.fillStyle = 'rgba(0,0,0,.55)';
+  ctx.font = '13px Cinzel, serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText(champ.letter, s.x, s.y + 1);
+  ctx.globalAlpha = 1;
+
+  // 보호막 링
+  if (u.shield > 0 && u.shieldExpire > G.time) {
+    ctx.strokeStyle = '#9fd6ff'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(s.x, s.y, 22, 0, Math.PI * 2); ctx.stroke();
+  }
+  // CC 표시
+  if (u.effects) {
+    if (u.effects.stun && u.effects.stun.expire > G.time) drawCcIcon(ctx, s.x, s.y - 32, '#f0e6d2', '★');
+    else if (u.effects.root && u.effects.root.expire > G.time) drawCcIcon(ctx, s.x, s.y - 32, '#b06bff', '✦');
+    else if (u.effects.slow && u.effects.slow.expire > G.time) drawCcIcon(ctx, s.x, s.y - 32, '#5dc8ff', '❄');
+    if (u.effects.exhaust && u.effects.exhaust.expire > G.time) drawCcIcon(ctx, s.x + 16, s.y - 32, '#ff4d5e', '↓');
+  }
+
+  // 체력/마나 바
+  drawHpBar(ctx, s.x, s.y - 26, 40, u.hp / u.maxHp, '#4fdc7a');
+  ctx.fillStyle = 'rgba(0,0,0,.55)'; ctx.fillRect(s.x - 20, s.y - 20, 40, 3);
+  ctx.fillStyle = '#5db8ff'; ctx.fillRect(s.x - 20, s.y - 20, 40 * clamp(u.mp / u.maxMp, 0, 1), 3);
+
+  if (u.isPlayer) {
+    ctx.strokeStyle = '#f0e6d2'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(s.x, s.y, 25, 0, Math.PI * 2); ctx.stroke();
+  }
+
+  ctx.fillStyle = '#c9d1e0'; ctx.font = '10px Inter, sans-serif';
+  ctx.fillText(champ.name + (u.isPlayer ? '' : ` Lv${u.level}`), s.x, s.y + 32);
+}
+
+function drawCcIcon(ctx, x, y, color, glyph) {
+  ctx.fillStyle = color; ctx.font = '12px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(glyph, x, y);
+}
+
+function drawParticles(ctx) {
+  G.particles.forEach(p => {
+    const t = (G.time - p.t) / p.life;
+    const s = w2s(p.x, p.y);
+    if (p.kind === 'text') {
+      ctx.globalAlpha = 1 - t;
+      ctx.fillStyle = p.color;
+      ctx.font = 'bold 13px Inter, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(p.text, s.x, s.y - t * 26);
+      ctx.globalAlpha = 1;
+    } else if (p.kind === 'ring') {
+      ctx.globalAlpha = 1 - t;
+      ctx.strokeStyle = p.color; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(s.x, s.y, p.radius * (0.4 + t * 0.6), 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+  });
+}
+
+function renderMinimap() {
+  const mctx = G.mctx;
+  mctx.clearRect(0, 0, 160, 160);
+  mctx.fillStyle = '#0d1220'; mctx.fillRect(0, 0, 160, 160);
+  const scale = 160 / WORLD;
+  mctx.strokeStyle = 'rgba(150,160,190,.25)'; mctx.lineWidth = 6; mctx.lineCap = 'round';
+  Object.values(PATHS).forEach(path => {
+    mctx.beginPath();
+    path.forEach((p, i) => { const x = p.x * scale, y = p.y * scale; if (i === 0) mctx.moveTo(x, y); else mctx.lineTo(x, y); });
+    mctx.stroke();
+  });
+  G.towers.forEach(t => { if (!t.alive) return; mctx.fillStyle = t.team === 'blue' ? '#3fa9ff' : '#ff4d5e'; mctx.fillRect(t.x * scale - 2, t.y * scale - 2, 4, 4); });
+  G.units.forEach(u => {
+    if (!isAlive(u)) return;
+    mctx.fillStyle = u.team === 'blue' ? '#3fa9ff' : '#ff4d5e';
+    mctx.beginPath(); mctx.arc(u.x * scale, u.y * scale, u.isPlayer ? 3.5 : 2.5, 0, Math.PI * 2); mctx.fill();
+  });
+  // 시야 사각형
+  mctx.strokeStyle = 'rgba(240,230,210,.6)'; mctx.lineWidth = 1;
+  const vx = G.camera.x * scale, vy = G.camera.y * scale, vw = G.vw * scale, vh = G.vh * scale;
+  mctx.strokeRect(vx - vw / 2, vy - vh / 2, vw, vh);
+}
+
+/* ---------------------------------------------------------------
+   17. HUD 동기화
+--------------------------------------------------------------- */
+let els = {};
+function cacheEls() {
+  const ids = ['timer','blueTowerCount','redTowerCount','blueKills','redKills','killFeed','toast','shopHint',
+    'hudName','hudLevel','hpFill','hpLabel','mpFill','mpLabel','xpFill','hudGold',
+    'slotHeal','slotExhaust','slotQ','slotW','slotE','slotR','shopGold','itemGrid'];
+  ids.forEach(id => els[id] = document.getElementById(id));
+}
+
+function fmtTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const ss = (s % 60).toString().padStart(2, '0');
+  return `${m}:${ss}`;
+}
+
+function syncHud() {
+  const p = G.player;
+  els.timer.textContent = fmtTime(G.time);
+  els.blueTowerCount.textContent = G.towers.filter(t => t.team === 'blue' && t.alive).length;
+  els.redTowerCount.textContent = G.towers.filter(t => t.team === 'red' && t.alive).length;
+  els.blueKills.textContent = G.units.filter(u => u.team === 'blue').reduce((a, u) => a + u.kills, 0);
+  els.redKills.textContent = G.units.filter(u => u.team === 'red').reduce((a, u) => a + u.kills, 0);
+
+  // 킬피드
+  els.killFeed.innerHTML = G.killFeed.map(k => `<div class="feed-item">${k.text}</div>`).join('');
+
+  if (!p) return;
+  els.hudName.textContent = p.champion.name + (p.alive ? '' : ' (부활 대기중)');
+  els.hudLevel.textContent = p.level;
+  els.hpFill.style.width = clamp(p.hp / p.maxHp, 0, 1) * 100 + '%';
+  els.hpLabel.textContent = `${Math.max(0, Math.round(p.hp))}/${Math.round(p.maxHp)}`;
+  els.mpFill.style.width = clamp(p.mp / p.maxMp, 0, 1) * 100 + '%';
+  els.mpLabel.textContent = `${Math.max(0, Math.round(p.mp))}/${Math.round(p.maxMp)}`;
+  els.xpFill.style.width = clamp(p.xp / p.xpNext, 0, 1) * 100 + '%';
+  els.hudGold.textContent = Math.floor(p.gold);
+
+  syncSlot(els.slotQ, p.champion.abilities.q.name, p.cds.q, 'q');
+  syncSlot(els.slotW, p.champion.abilities.w.name, p.cds.w, 'w');
+  syncSlot(els.slotE, p.champion.abilities.e.name, p.cds.e, 'e');
+  syncSlot(els.slotR, p.champion.abilities.r.name, p.cds.r, 'r');
+  syncSpellSlot(els.slotHeal, p.cds.heal);
+  syncSpellSlot(els.slotExhaust, p.cds.exhaust);
+
+  // 상점 힌트
+  const f = FOUNTAIN[p.team];
+  const nearBase = dist2(p.x, p.y, f.x, f.y) < 300;
+  els.shopHint.classList.toggle('show', nearBase && !shopOpen);
+}
+
+function syncSlot(el, name, cdUntil, key) {
+  const remain = Math.max(0, cdUntil - G.time) / 1000;
+  const ready = remain <= 0.05;
+  el.classList.toggle('ready', ready);
+  let cdDiv = el.querySelector('.cd');
+  let nmDiv = el.querySelector('.nm');
+  if (!nmDiv) { nmDiv = document.createElement('div'); nmDiv.className = 'nm'; el.appendChild(nmDiv); }
+  nmDiv.textContent = name;
+  if (!ready) {
+    if (!cdDiv) { cdDiv = document.createElement('div'); cdDiv.className = 'cd'; el.appendChild(cdDiv); }
+    cdDiv.textContent = remain >= 10 ? Math.ceil(remain) : remain.toFixed(1);
+  } else if (cdDiv) { cdDiv.remove(); }
+}
+function syncSpellSlot(el, cdUntil) {
+  const remain = Math.max(0, cdUntil - G.time) / 1000;
+  const ready = remain <= 0.05;
+  el.classList.toggle('ready', ready);
+  let cdDiv = el.querySelector('.cd');
+  if (!ready) {
+    if (!cdDiv) { cdDiv = document.createElement('div'); cdDiv.className = 'cd'; el.appendChild(cdDiv); }
+    cdDiv.textContent = Math.ceil(remain);
+  } else if (cdDiv) { cdDiv.remove(); }
+}
+
+let toastTimer = null;
+function showToast(msg) {
+  els.toast.textContent = msg;
+  els.toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => els.toast.classList.remove('show'), 1600);
+}
+
+/* ---------------------------------------------------------------
+   18. 상점 UI
+--------------------------------------------------------------- */
+let shopOpen = false;
+function buildShopUI() {
+  els.itemGrid.innerHTML = '';
+  ITEMS.forEach(it => {
+    const div = document.createElement('div');
+    div.className = 'item-card';
+    div.innerHTML = `<div class="item-name">${it.name}</div><div class="item-stat">${it.statText}</div><div class="item-cost">${it.cost}g</div>`;
+    div.addEventListener('click', () => buyItem(it, div));
+    els.itemGrid.appendChild(div);
+    div._item = it;
+  });
+}
+function buyItem(it, div) {
+  const p = G.player;
+  if (!p || !p.alive) return;
+  if (p.boughtItems.includes(it.id)) { showToast('이미 구매한 아이템입니다'); return; }
+  if (p.gold < it.cost) { showToast('골드가 부족합니다'); return; }
+  p.gold -= it.cost;
+  it.apply(p);
+  p.boughtItems.push(it.id);
+  showToast(it.name + ' 구매!');
+  refreshShopUI();
+}
+function refreshShopUI() {
+  const p = G.player;
+  els.shopGold.textContent = p ? Math.floor(p.gold) : 0;
+  [...els.itemGrid.children].forEach(div => {
+    const it = div._item;
+    const owned = p && p.boughtItems.includes(it.id);
+    div.classList.toggle('owned', !!owned);
+    div.classList.toggle('cant', !owned && p && p.gold < it.cost);
+  });
+}
+function toggleShop(forceState) {
+  const p = G.player;
+  if (!p) return;
+  const f = FOUNTAIN[p.team];
+  const nearBase = dist2(p.x, p.y, f.x, f.y) < 300;
+  const want = (forceState !== undefined) ? forceState : !shopOpen;
+  if (want && !nearBase) { showToast('상점은 기지 근처에서만 이용할 수 있습니다'); return; }
+  shopOpen = want;
+  document.getElementById('shopModal').classList.toggle('hidden', !shopOpen);
+  if (shopOpen) refreshShopUI();
+}
+
+/* ---------------------------------------------------------------
+   19. 입력 처리
+--------------------------------------------------------------- */
+function setupInput() {
+  const canvas = G.canvas;
+
+  canvas.addEventListener('mousemove', e => {
+    const rect = canvas.getBoundingClientRect();
+    G.mouseScreen.x = e.clientX - rect.left;
+    G.mouseScreen.y = e.clientY - rect.top;
+    G.mouseWorld.x = G.mouseScreen.x + G.camera.x - G.vw / 2;
+    G.mouseWorld.y = G.mouseScreen.y + G.camera.y - G.vh / 2;
+  });
+
+  canvas.addEventListener('contextmenu', e => e.preventDefault());
+
+  canvas.addEventListener('mousedown', e => {
+    if (!G.running || G.gameOver) return;
+    const p = G.player;
+    if (!p || !p.alive) return;
+    if (e.button === 2) {
+      p.moveTarget = { x: G.mouseWorld.x, y: G.mouseWorld.y };
+      p.attackTarget = null;
+    } else if (e.button === 0) {
+      const enemyTeam = enemiesOf(p.team);
+      const candidates = [
+        ...G.units.filter(u => u.team === enemyTeam && isAlive(u)),
+        ...G.minions.filter(m => m.team === enemyTeam),
+        ...G.towers.filter(t => t.team === enemyTeam && t.alive),
+        ...G.jungleCamps.filter(j => j.alive)
+      ];
+      const target = findNearest(G.mouseWorld.x, G.mouseWorld.y, candidates, () => true, 55);
+      if (target) { p.attackTarget = target; p.moveTarget = null; }
+    }
+  });
+
+  window.addEventListener('keydown', e => {
+    const k = e.key.toLowerCase();
+    G.keys[k] = true;
+    if (!G.running || G.gameOver) return;
+    const p = G.player;
+    if (!p) return;
+    if (k === 'q' || k === 'w' || k === 'e' || k === 'r') {
+      if (p.alive) castAbility(p, k);
+    } else if (k === 'f') {
+      if (p.alive) castHeal(p);
+    } else if (k === 'd') {
+      if (p.alive) castExhaust(p);
+    } else if (k === 'p') {
+      toggleShop();
+    } else if (k === 'escape') {
+      if (shopOpen) toggleShop(false);
+    }
+  });
+  window.addEventListener('keyup', e => { G.keys[e.key.toLowerCase()] = false; });
+
+  document.getElementById('closeShopBtn').addEventListener('click', () => toggleShop(false));
+}
+
+function resizeCanvas() {
+  const wrap = document.getElementById('viewport');
+  G.vw = wrap.clientWidth;
+  G.vh = wrap.clientHeight;
+  G.canvas.width = G.vw;
+  G.canvas.height = G.vh;
+}
+
+/* ---------------------------------------------------------------
+   20. 드래프트(챔피언 선택) 화면
+--------------------------------------------------------------- */
+const draft = { diff: null, pos: null, champ: null };
+
+function buildChampGrid() {
+  const grid = document.getElementById('champGrid');
+  grid.innerHTML = '';
+  CHAMPIONS.forEach(c => {
+    const card = document.createElement('div');
+    card.className = 'champ-card';
+    card.style.setProperty('--accent', c.color);
+    card.innerHTML = `
+      <div class="champ-portrait">${c.letter}</div>
+      <div class="champ-name">${c.name}</div>
+      <div class="champ-role">${c.role}</div>
+      <div class="champ-kit">
+        <span class="kit-tag">Q ${c.abilities.q.name}</span>
+      </div>
+      <div class="champ-kit">
+        <span class="kit-tag">R ${c.abilities.r.name}</span>
+      </div>`;
+    card.addEventListener('click', () => {
+      draft.champ = c.id;
+      [...grid.children].forEach(el => el.classList.remove('selected'));
+      card.classList.add('selected');
+      updateDraftPreview();
+      checkBegin();
+    });
+    grid.appendChild(card);
+  });
+}
+
+/* ---- wizard 단계 전환 ---- */
+let wizardStep = 1;
+function goToStep(n) {
+  wizardStep = n;
+  document.querySelectorAll('.wizard-pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane' + n).classList.add('active');
+  document.querySelectorAll('.wp-step').forEach(el => {
+    const s = parseInt(el.dataset.wp, 10);
+    el.classList.toggle('done', s < n);
+    el.classList.toggle('current', s === n);
+  });
+  document.querySelectorAll('.wizard-labels span').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.wl, 10) === n);
+  });
+}
+
+function setupDraftButtons() {
+  document.querySelectorAll('#diffRow .choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      draft.diff = btn.dataset.diff;
+      document.querySelectorAll('#diffRow .choice-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      checkBegin();
+      setTimeout(() => goToStep(2), 180); // 선택 즉시 다음 화면으로 이동
+    });
+  });
+  document.querySelectorAll('#posRow .choice-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      draft.pos = btn.dataset.pos;
+      document.querySelectorAll('#posRow .choice-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      updateDraftPreview();
+      checkBegin();
+      setTimeout(() => goToStep(3), 180);
+    });
+  });
+
+  document.getElementById('toStep2').addEventListener('click', () => goToStep(2));
+  document.getElementById('toStep3').addEventListener('click', () => goToStep(3));
+  document.getElementById('toStep1b').addEventListener('click', () => goToStep(1));
+  document.getElementById('toStep2b').addEventListener('click', () => goToStep(2));
+
+  document.getElementById('beginBtn').addEventListener('click', startGame);
+  goToStep(1);
+}
+
+function updateDraftPreview() {
+  const blueDiv = document.getElementById('bluePreview');
+  const redDiv = document.getElementById('redPreview');
+  const champName = draft.champ ? CHAMP_BY_ID[draft.champ].name : '???';
+  blueDiv.innerHTML = POSITIONS.map(pos => {
+    const isMe = pos === draft.pos;
+    return `<div class="slot-row ${isMe ? 'filled me' : ''}"><span class="dot"></span>${POS_LABEL[pos]}: ${isMe ? champName + ' (나)' : 'AI 봇'}</div>`;
+  }).join('');
+  redDiv.innerHTML = POSITIONS.map(pos => `<div class="slot-row"><span class="dot"></span>${POS_LABEL[pos]}: AI 봇</div>`).join('');
+  const summary = document.getElementById('champSummary');
+  if (summary) {
+    summary.innerHTML = (draft.diff ? `난이도: <b>${({easy:'쉬움',normal:'보통',hard:'어려움'})[draft.diff]}</b> · ` : '') +
+      (draft.pos ? `포지션: <b>${POS_LABEL[draft.pos]}</b>` : '');
+  }
+}
+
+function checkBegin() {
+  document.getElementById('toStep2').disabled = !draft.diff;
+  document.getElementById('toStep3').disabled = !(draft.diff && draft.pos);
+  document.getElementById('beginBtn').disabled = !(draft.diff && draft.pos && draft.champ);
+}
+
+/* ---------------------------------------------------------------
+   21. 게임 시작 / 종료
+--------------------------------------------------------------- */
+function startGame() {
+  G.difficulty = draft.diff;
+  G.playerPosition = draft.pos;
+  G.playerChampionId = draft.champ;
+  G.time = 0; G.gameOver = false; G.running = true;
+
+  buildTeams();
+  buildMap();
+
+  document.getElementById('startScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+  document.getElementById('gameOverScreen').classList.add('hidden');
+  shopOpen = false;
+  document.getElementById('shopModal').classList.add('hidden');
+
+  resizeCanvas();
+  updateCamera();
+  lastFrame = performance.now();
+  requestAnimationFrame(loop);
+}
+
+function endGame(winningTeam) {
+  if (G.gameOver) return;
+  G.gameOver = true;
+  G.running = false;
+  const title = document.getElementById('resultTitle');
+  const sub = document.getElementById('resultSub');
+  const playerWon = winningTeam === G.player.team;
+  title.textContent = playerWon ? 'VICTORY' : 'DEFEAT';
+  title.className = 'font-display ' + (playerWon ? 'victory' : 'defeat');
+  sub.textContent = playerWon ? '적 넥서스를 파괴했습니다!' : '아군 넥서스가 파괴되었습니다...';
+  document.getElementById('gameOverScreen').classList.remove('hidden');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('restartBtn').addEventListener('click', () => location.reload());
+});
+
+/* ---------------------------------------------------------------
+   22. 메인 루프 / 부트스트랩
+--------------------------------------------------------------- */
+let lastFrame = 0;
+function loop(now) {
+  if (!G.running) return;
+  let dt = (now - lastFrame) / 1000;
+  lastFrame = now;
+  dt = clamp(dt, 0, 0.05); // 큰 프레임 드랍 방지
+  update(dt);
+  render();
+  if (G.running) requestAnimationFrame(loop);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  cacheEls();
+  G.canvas = document.getElementById('gameCanvas');
+  G.ctx = G.canvas.getContext('2d');
+  G.mini = document.getElementById('minimap');
+  G.mctx = G.mini.getContext('2d');
+
+  buildChampGrid();
+  setupDraftButtons();
+  updateDraftPreview();
+  buildShopUI();
+  setupInput();
+
+  window.addEventListener('resize', () => { if (G.running) resizeCanvas(); });
+});
+
+</script>
+</body>
+</html>
